@@ -1,0 +1,141 @@
+from torchvision import datasets, transforms
+from torch.utils.data.dataloader import DataLoader
+from loaders.CUB200 import CUB_200
+from loaders.ImageNet import ImageNet
+import numpy as np
+import os
+
+
+def get_train_transformations(args, norm_value):
+    if args.process:
+        aug_extra = []
+    else:
+        aug_extra = [transforms.RandomHorizontalFlip(),
+                    # transforms.RandomVerticalFlip(),
+                    # transforms.RandomApply([transforms.RandomRotation([-45, 45])], p=0.8),
+                    # transforms.RandomApply([transforms.RandomAffine(degrees=0, translate=(0.15, 0.15), fillcolor=(0, 0, 0))],
+                    #                        p=0.8),]
+                     ]
+    aug_list = [
+                transforms.Resize([args.img_size, args.img_size]),
+                transforms.ToTensor(),
+                transforms.Normalize(norm_value[0], norm_value[1])
+                ]
+    aug_list = aug_extra + aug_list
+    return transforms.Compose(aug_list)
+
+
+def get_val_transformations(args, norm_value):
+    aug_list = [transforms.Resize([args.img_size, args.img_size]),
+                transforms.ToTensor(),
+                transforms.Normalize(norm_value[0], norm_value[1])
+                ]
+    return transforms.Compose(aug_list)
+
+
+def get_transform(args):
+    if args.dataset == "MNIST":
+        transform = transforms.Compose([transforms.Resize([args.img_size, args.img_size]), transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
+        return {"train": transform, "val": transform}
+    elif args.dataset == "cifar10":
+        transform = transforms.Compose([transforms.Resize([args.img_size, args.img_size]), transforms.ToTensor(),
+                                        transforms.Normalize([0.4914, 0.4822, 0.4465], [0.2470, 0.2435, 0.2616])])
+        return {"train": transform, "val": transform}
+    elif args.dataset == "cifar100":
+        transform = transforms.Compose([transforms.Resize([args.img_size, args.img_size]), transforms.ToTensor(),
+                                        transforms.Normalize([0.5071, 0.4867, 0.4408], [0.2675, 0.2565, 0.2761])])
+        return {"train": transform, "val": transform}
+    elif args.dataset == "CUB200" or args.dataset == "ImageNet":
+        transform_train = get_train_transformations(args, [[0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.201]])
+        transform_val = get_val_transformations(args, [[0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.201]])
+        return {"train": transform_train, "val": transform_val}
+
+    raise ValueError(f'unknown {args.dataset}')
+
+
+def select_dataset(args, transform):
+    if args.dataset == "MNIST":
+        dataset_train = datasets.MNIST('./data/mnist', train=True, download=True, transform=transform["train"])
+        dataset_val = datasets.MNIST('./data/mnist', train=False, transform=transform["val"])
+        return dataset_train, dataset_val
+    elif args.dataset == "cifar10":
+        dataset_train = datasets.CIFAR10('./data/cifar10', train=True, download=True, transform=transform["train"])
+        dataset_val = datasets.CIFAR10('./data/cifar10', train=False, transform=transform["val"])
+        return dataset_train, dataset_val
+    elif args.dataset == "cifar100":
+        dataset_train = datasets.CIFAR100('./data/cifar100', train=True, download=True, transform=transform["train"])
+        dataset_val = datasets.CIFAR100('./data/cifar100', train=False, transform=transform["val"])
+        return dataset_train, dataset_val
+    elif args.dataset == "CUB200":
+        dataset_train = CUB_200(args, train=True, transform=transform["train"])
+        dataset_val = CUB_200(args, train=False, transform=transform["val"])
+        return dataset_train, dataset_val
+    elif args.dataset == "ImageNet":
+        dataset_train = ImageNet(args, "train", transform=transform["train"])
+        dataset_val = ImageNet(args, "val", transform=transform["val"])
+        return dataset_train, dataset_val
+
+    raise ValueError(f'unknown {args.dataset}')
+
+
+def loader_generation(args):
+    transform = get_transform(args)
+    train_set, val_set = select_dataset(args, transform)
+    print('Train samples %d - Val samples %d' % (len(train_set), len(val_set)))
+
+    train_loader1 = DataLoader(train_set, batch_size=args.batch_size,
+                              shuffle=True,
+                              num_workers=args.num_workers,
+                              pin_memory=False, drop_last=True)
+    train_loader2 = DataLoader(train_set, batch_size=args.batch_size,
+                              shuffle=False,
+                              num_workers=args.num_workers,
+                              pin_memory=False, drop_last=False)
+    val_loader = DataLoader(val_set, batch_size=args.batch_size,
+                           shuffle=False,
+                           num_workers=args.num_workers,
+                           pin_memory=False, drop_last=False)
+    return train_loader1, train_loader2, val_loader
+
+
+def load_all_imgs(args):
+    def filter(data):
+        imgs = []
+        labels = []
+        for i in range(len(data)):
+            root = data[i][0]
+            ll = int(data[i][1])
+            if args.dataset == "CUB200":
+                ll -= 1
+                root = os.path.join(os.path.join(args.dataset_dir, args.dataset, "CUB_200_2011", "CUB_200_2011"), 'images', root)
+            imgs.append(root)
+            labels.append(ll)
+        return imgs, labels
+
+    if args.dataset == "MNIST":
+        train_imgs = datasets.MNIST('./data/mnist', train=True, download=True, transform=None).data
+        train_labels = datasets.MNIST('./data/mnist', train=True, download=True, transform=None).targets
+        val_imgs = datasets.MNIST('./data/mnist', train=False, download=True, transform=None).data
+        val_labels = datasets.MNIST('./data/mnist', train=False, download=True, transform=None).targets
+        return train_imgs, train_labels, val_imgs, val_labels, ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    elif args.dataset == "cifar10":
+        cat = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+        train_imgs = datasets.CIFAR10('./data/cifar10', train=True, download=True, transform=None).data
+        train_labels = datasets.CIFAR10('./data/cifar10', train=True, download=True, transform=None).targets
+        val_imgs = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).data
+        val_labels = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).targets
+        return train_imgs, train_labels, val_imgs, val_labels, cat
+    elif args.dataset == "ImageNet":
+        train = ImageNet(args, "train", transform=None).train
+        val = ImageNet(args, "train", transform=None).val
+        cat = ImageNet(args, "train", transform=None).category
+        train_imgs, train_labels = filter(train)
+        val_imgs, val_labels = filter(val)
+        return train_imgs, train_labels, val_imgs, val_labels, cat
+    elif args.dataset == "CUB200":
+        train = CUB_200(args)._train_path_label
+        val = CUB_200(args)._test_path_label
+        cat = np.arange(1, args.num_classes+1, 1)
+        train_imgs, train_labels = filter(train)
+        val_imgs, val_labels = filter(val)
+        return train_imgs, train_labels, val_imgs, val_labels, cat
