@@ -34,10 +34,10 @@ class ScouterAttention(nn.Module):
         self.vis = vis
         self.power = power
 
-    def forward(self, inputs, inputs_x, weight=None, things=None):
-        b, n, d = inputs.shape
+    def forward(self, inputs_pe, inputs, weight=None, things=None):
+        b, n, d = inputs_pe.shape
         slots = self.initial_slots.expand(b, -1, -1)
-        k, v = self.to_k(inputs), inputs
+        k, v = self.to_k(inputs_pe), inputs_pe
         for _ in range(self.iters):
             q = slots
 
@@ -55,44 +55,13 @@ class ScouterAttention(nn.Module):
             else:
                 raise RuntimeError(f"unsupported input to tensor dot, got slot mode={self.slot_mode}")
 
-            updates = torch.einsum('bjd,bij->bid', inputs_x, attn)
-            updates = updates / inputs_x.size(2)
+            updates = torch.einsum('bjd,bij->bid', inputs, attn)
+            updates = updates / inputs.size(2)
 
         if self.vis:
             slots_vis_raw = attn.clone()
             vis(slots_vis_raw, "vis", self.args.feature_size, weight, things)
         return updates, attn
-
-    def entropy_loss(self, att):
-        att_pro = att.softmax(-1)
-        att_pro = att_pro.mean(0)
-        entropy_loss = 0
-        for i in range(self.num_slots):
-            entropy_loss += entropy(att_pro[0], input_as_probabilities=True)
-        out = entropy_loss / self.num_slots
-        return out
-
-
-def entropy(x, input_as_probabilities):
-    """
-    Helper function to compute the entropy over the batch
-
-    input: batch w/ shape [b, num_classes]
-    output: entropy value [is ideally -log(num_classes)]
-    """
-    EPS = 1e-8
-    if input_as_probabilities:
-        x_ = torch.clamp(x, min=EPS)
-        b = x_ * torch.log(x_)
-    else:
-        b = F.softmax(x, dim=1) * F.log_softmax(x, dim=1)
-
-    if len(b.size()) == 2:  # Sample-wise entropy
-        return -b.sum(dim=1).mean()
-    elif len(b.size()) == 1:  # Distribution-wise entropy
-        return - b.sum()
-    else:
-        raise ValueError('Input tensor is %d-Dimensional' % (len(b.size())))
 
 
 def vis(slots_vis_raw, loc, size, weight=None, things=None):

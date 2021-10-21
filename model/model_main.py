@@ -38,7 +38,7 @@ class MainModel(nn.Module):
             self.num_features = 512
         self.feature_size = args.feature_size
         self.drop_rate = 0.0
-        hidden_dim = 64
+        hidden_dim = 128
         num_concepts = args.num_cpt
         num_classes = args.num_classes
         self.back_bone = load_backbone(args)
@@ -49,6 +49,7 @@ class MainModel(nn.Module):
             self.conv1x1 = nn.Conv2d(self.num_features, hidden_dim, kernel_size=(1, 1), stride=(1, 1))
             self.position_emb = build_position_encoding('sine', hidden_dim=hidden_dim)
             self.slots = ScouterAttention(args, hidden_dim, num_concepts, vis=vis)
+            self.norm = nn.BatchNorm2d(hidden_dim)
             self.scale = 1
             self.cls = torch.nn.Linear(num_concepts, num_classes)
         else:
@@ -59,6 +60,7 @@ class MainModel(nn.Module):
         x = x.view(x.size(0), self.num_features, self.feature_size, self.feature_size)
         if not self.pre_train:
             x = self.conv1x1(x)
+            x = self.norm(x)
             x = torch.relu(x)
             pe = self.position_emb(x)
             x_pe = x + pe
@@ -72,8 +74,9 @@ class MainModel(nn.Module):
             else:
                 cpt_activation = updates
             attn_cls = self.scale * torch.sum(cpt_activation, dim=-1)
-            cls = self.cls(attn_cls)
-            return (self.activation(attn_cls) - 0.5) * 2, cls, attn, updates
+            cpt = (self.activation(attn_cls) - 0.5) * 2
+            cls = self.cls(cpt)
+            return cpt, cls, attn, updates
         else:
             x = self.global_pool(x).squeeze(-1).squeeze(-1)
             x = self.fc(x)

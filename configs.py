@@ -9,11 +9,11 @@ parser.add_argument('--dataset_dir', type=str, default="/media/wbw/a7f02863-b441
 parser.add_argument('--output_dir', type=str, default="saved_model")
 # ========================= Model Configs ==========================
 parser.add_argument('--num_classes', default=50, help='category for classification')
-parser.add_argument('--num_cpt', default=25, help='number of the concept')
+parser.add_argument('--num_cpt', default=50, help='number of the concept')
 parser.add_argument('--base_model', default="resnet18", type=str)
 parser.add_argument('--img_size', default=224, help='size for input image')
-parser.add_argument('--pre_train', default=True, type=bool,
-                    help='whether use ImageNet pre-train parameter for backbone')
+parser.add_argument('--pre_train', default=False, type=bool,
+                    help='whether pre-train the model')
 parser.add_argument('--act_type', default="sigmoid", help='the activation for the slot attention')
 parser.add_argument('--num_retrieval', default=50, help='number of the top retrieval images')
 parser.add_argument('--weight_att', default=False, help='using fc weight for att visualization')

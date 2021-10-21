@@ -129,7 +129,6 @@ def attention_estimation(data, label, model, transform, device):
     contains = []
     for i in range(len(data)):
         if selected_class in data[i]:
-            print(i)
             contains.append(data[i])
 
     attention_record = []

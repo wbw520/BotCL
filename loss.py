@@ -36,10 +36,19 @@ def get_retrieval_loss(y, label, num_cls, device):
     return similarity_loss, q_loss
 
 
-def batch_cpt_discriminate(data):
-    data = data.mean(0)
-    sim = ((data[None, :, :] - data[:, None, :]) ** 2).sum(-1)
-    return torch.tanh(sim).mean()
+def batch_cpt_discriminate(data, att):
+    b1, c, d1 = data.shape
+    record = []
+    for i in range(c):
+        current_f = data[:, i, :]
+        current_att = att.sum(-1)[:, i]
+        indices = current_att > current_att.mean()
+        b, d = current_f[indices].shape
+        current_f = current_f[indices] # / current_att[indices].unsqueeze(-1).expand(b, d)
+        record.append(torch.mean(current_f, dim=0, keepdim=True))
+    record = torch.cat(record, dim=0)
+    sim = ((record[None, :, :] - record[:, None, :]) ** 2).sum(-1)
+    return sim.mean()
 
 
 def att_binary(att):
@@ -66,8 +75,9 @@ def att_consistence(update, att):
         current_up = update[:, i, :]
         current_att = att[:, i, :].sum(-1)
         indices = current_att > current_att.mean()
-        need = current_up[indices]
-        consistence_loss += torch.tanh(((need[None, :, :] - need[:, None, :]) ** 2).sum(-1)).mean()
+        b, d = current_up[indices].shape
+        need = current_up[indices] # / current_att[indices].unsqueeze(-1).expand(b, d)
+        consistence_loss += ((need[None, :, :] - need[:, None, :]) ** 2).sum(-1).mean()
     return consistence_loss/cpt
 
 

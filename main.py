@@ -38,7 +38,7 @@ def main():
         # Adjust lr
         if i == args.lr_drop:
             print("Adjusted learning rate to 1/10")
-            optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.1
+            optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.5
         train(args, model, device, train_loader1, optimizer, i)
         # res_loss, att_loss, acc, entropy_l = evaluation(model, device, valloader, reconstruction_loss)
         if i == args.epoch - 1:

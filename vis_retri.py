@@ -46,7 +46,6 @@ def main():
 
     # attention statistic
     att_record = attention_estimation(imgs_database, labels_database, model, transform, device)
-    print(att_record.shape)
     draw_plot(att_record)
 
     # data = imgs_val[index]
@@ -73,11 +72,7 @@ def main():
     draw_bar(w_numpy)
     print(w_numpy)
     print("--------cpt---------")
-    if args.cpt_activation == "att":
-        cpt_act = att
-    else:
-        cpt_act = update
-    print(np.around(torch.sum(cpt_act, dim=-1).cpu().detach().numpy(), 4))
+    print(np.around(cpt.cpu().detach().numpy(), 4))
     if args.weight_att:
         w[w < 0] = 0
         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), w)
@@ -95,7 +90,7 @@ def main():
     test_labels = f1["test_labels"]
 
     query = np.zeros((1, args.num_cpt)) - 1
-    location = 4
+    location = 2
     query[0][location] = 1
     ids = for_retrival(args, np.array(database_hash), query, location=location)
     print("-------------------------")

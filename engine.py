@@ -32,7 +32,7 @@ def train(args, model, device, loader, optimizer, epoch):
             retri_loss, quantity_loss = get_retrieval_loss(cpt, label, args.num_classes, device)
             loss_pred = F.nll_loss(F.log_softmax(pred, dim=1), label)
             acc = cal_acc(pred, label)
-            batch_dis_loss = batch_cpt_discriminate(update)
+            batch_dis_loss = batch_cpt_discriminate(update, att)
             consistence_loss = att_consistence(update, att)
             att_binary_loss = att_binary(att)
             attn_loss = att_area_loss(att)
@@ -48,17 +48,17 @@ def train(args, model, device, loader, optimizer, epoch):
             pred_acces.update(acc)
 
             if epoch >= args.lr_drop:
-                s = 20
-                k = 0
+                s = 0
+                k = 2
                 q = 5
                 t = 2
             else:
-                s = 10
-                k = 0
+                s = 0
+                k = 1
                 q = 1
                 t = 0.5
 
-            loss_total = retri_loss + s * attn_loss + t * quantity_loss + 1 * loss_pred + q * consistence_loss - k * batch_dis_loss
+            loss_total = retri_loss + s * attn_loss + t * quantity_loss + 0.5 * loss_pred + q * consistence_loss - k * batch_dis_loss + 0 * att_dis_loss
         else:
             cpt = model(data)
             retri_loss, quantity_loss = get_retrieval_loss(cpt, label, args.num_classes, device)
