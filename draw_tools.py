@@ -8,7 +8,7 @@ plt.rcParams['axes.linewidth'] = 2
 
 
 def draw_bar(data):
-    plt.figure(figsize=(8, 6), dpi=80)
+    plt.figure(figsize=(20, 6), dpi=80)
     font = 22
     x_bar = np.arange(0, len(data), 1)
     plt.bar(x_bar, data)
@@ -22,7 +22,7 @@ def draw_bar(data):
 
 def draw_plot(data):
     font = 22
-    plt.figure(figsize=(8, 6), dpi=80)
+    plt.figure(figsize=(20, 6), dpi=80)
     b, c = data.shape
     for i in range(c):
         plt.boxplot(data[:, i], positions=[i*10], widths=5, showmeans=True)

@@ -90,7 +90,7 @@ def main():
     test_labels = f1["test_labels"]
 
     query = np.zeros((1, args.num_cpt)) - 1
-    location = 2
+    location = 14
     query[0][location] = 1
     ids = for_retrival(args, np.array(database_hash), query, location=location)
     print("-------------------------")

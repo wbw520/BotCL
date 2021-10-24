@@ -55,8 +55,9 @@ class ScouterAttention(nn.Module):
             else:
                 raise RuntimeError(f"unsupported input to tensor dot, got slot mode={self.slot_mode}")
 
+            # attn2 = attn / (attn.sum(dim=-1, keepdim=True) + self.eps)
             updates = torch.einsum('bjd,bij->bid', inputs, attn)
-            updates = updates / inputs.size(2)
+            # updates = updates / (attn.sum(-1).unsqueeze(-1) + 1)
 
         if self.vis:
             slots_vis_raw = attn.clone()

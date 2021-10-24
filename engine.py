@@ -48,17 +48,17 @@ def train(args, model, device, loader, optimizer, epoch):
             pred_acces.update(acc)
 
             if epoch >= args.lr_drop:
-                s = 0
-                k = 2
+                s = 5
+                k = 5
                 q = 5
                 t = 2
             else:
-                s = 0
+                s = 1
                 k = 1
                 q = 1
-                t = 0.5
+                t = 1
 
-            loss_total = retri_loss + s * attn_loss + t * quantity_loss + 0.5 * loss_pred + q * consistence_loss - k * batch_dis_loss + 0 * att_dis_loss
+            loss_total = retri_loss + s * attn_loss + t * quantity_loss + 0.5 * loss_pred - q * consistence_loss + k * batch_dis_loss
         else:
             cpt = model(data)
             retri_loss, quantity_loss = get_retrieval_loss(cpt, label, args.num_classes, device)

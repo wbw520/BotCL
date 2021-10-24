@@ -1,5 +1,6 @@
 import torch
 from torch.autograd import Variable
+import torch.nn.functional as F
 
 
 def pairwise_loss(outputs1, outputs2, label1, label2, sigmoid_param=1.):
@@ -44,10 +45,10 @@ def batch_cpt_discriminate(data, att):
         current_att = att.sum(-1)[:, i]
         indices = current_att > current_att.mean()
         b, d = current_f[indices].shape
-        current_f = current_f[indices] # / current_att[indices].unsqueeze(-1).expand(b, d)
+        current_f = current_f[indices] / current_att[indices].unsqueeze(-1).expand(b, d)
         record.append(torch.mean(current_f, dim=0, keepdim=True))
     record = torch.cat(record, dim=0)
-    sim = ((record[None, :, :] - record[:, None, :]) ** 2).sum(-1)
+    sim = F.cosine_similarity(record[None, :, :], record[:, None, :], dim=-1)
     return sim.mean()
 
 
@@ -76,8 +77,8 @@ def att_consistence(update, att):
         current_att = att[:, i, :].sum(-1)
         indices = current_att > current_att.mean()
         b, d = current_up[indices].shape
-        need = current_up[indices] # / current_att[indices].unsqueeze(-1).expand(b, d)
-        consistence_loss += ((need[None, :, :] - need[:, None, :]) ** 2).sum(-1).mean()
+        need = current_up[indices] / current_att[indices].unsqueeze(-1).expand(b, d)
+        consistence_loss += F.cosine_similarity(need[None, :, :], need[:, None, :], dim=-1).mean()
     return consistence_loss/cpt
 
 
