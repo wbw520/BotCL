@@ -1,9 +1,9 @@
 from loaders.get_loader import loader_generation
 import torch
 from configs import parser
-from tools import predict_hash_code, mean_average_precision
+from utils.tools import predict_hash_code, mean_average_precision
 import os
-from model.model_main import MainModel
+from model.retrieval.model_main import MainModel
 import h5py
 
 

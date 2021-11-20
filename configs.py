@@ -35,3 +35,7 @@ parser.add_argument('--lr_drop', default=60, type=float, nargs="+",
 parser.add_argument('--num_workers', default=4, type=int)
 parser.add_argument('--device', default='cuda:0',
                     help='device to use for training / testing')
+# ========================= Demo Configs ==========================
+parser.add_argument('--index', default=100, type=int)
+parser.add_argument('--top_samples', default=20, type=int)
+

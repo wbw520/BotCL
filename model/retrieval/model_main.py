@@ -2,8 +2,8 @@ from timm.models import create_model
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-from model.slots import ScouterAttention, vis
-from model.position_encode import build_position_encoding
+from model.retrieval.slots import ScouterAttention, vis
+from model.retrieval.position_encode import build_position_encoding
 from timm.models.layers import SelectAdaptivePool2d
 
 

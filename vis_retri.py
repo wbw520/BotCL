@@ -43,16 +43,13 @@ def main():
     # # 4    4
 
     # 153  5
-    index = 2331
+    index = args.index
 
-    # attention statistic
-    name = "n01443537"
-    att_record = attention_estimation(imgs_database, labels_database, model, transform, device, name=name)
-    draw_plot(att_record, name)
+    # # attention statistic
+    # name = args.demo_cls
+    # att_record = attention_estimation(imgs_database, labels_database, model, transform, device, name=name)
+    # draw_plot(att_record, name)
 
-    for i in range(len(imgs_database)):
-        if "Yellow_headed_Blackbird" in imgs_database[i]:
-            print(i)
     # data = imgs_val[index]
     # label = labels_val[index]
     data = imgs_database[index]
@@ -72,16 +69,16 @@ def main():
     print("-------------------------")
     pp = torch.argmax(pred, dim=-1)
     print("predicted as: ", cat[pp])
-    print("--------weight---------")
-    w = model.state_dict()["cls.weight"][label]
-    w_numpy = np.around(torch.tanh(w).cpu().detach().numpy(), 4)
-    draw_bar(w_numpy, name)
-    print(w_numpy)
-    print("--------cpt---------")
-    print(np.around(cpt.cpu().detach().numpy(), 4))
-    if args.weight_att:
-        w[w < 0] = 0
-        cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), w)
+    # print("--------weight---------")
+    # w = model.state_dict()["cls.weight"][label]
+    # w_numpy = np.around(torch.tanh(w).cpu().detach().numpy(), 4)
+    # draw_bar(w_numpy, name)
+    # print(w_numpy)
+    # print("--------cpt---------")
+    # print(np.around(cpt.cpu().detach().numpy(), 4))
+    # if args.weight_att:
+    #     w[w < 0] = 0
+    #     cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), w)
 
     for id in range(args.num_cpt):
         slot_image = np.array(Image.open(f'vis/0_slot_{id}.png'), dtype=np.uint8)
@@ -95,8 +92,6 @@ def main():
     test_hash = f1["test_hash"]
     test_labels = f1["test_labels"]
 
-    location = 9
-
     # query_sample = np.array([database_hash[index]])
     # query_sample[0][location] = -1
     # ids = for_retrival(args, database_hash, query_sample, None)
@@ -106,29 +101,30 @@ def main():
     #     img_re = Image.open(imgs_database[current_is]).convert('RGB').resize([224, 224], resample=Image.BILINEAR)
     #     img_re.save(f"retrieval_results/re_{i}.png")
 
-    selected = np.array(database_hash)[:, location]
-    ids = np.argsort(-selected, axis=0)
-    idx = ids[:100]
     print("-------------------------")
     print("generating retrieval samples")
-
-    for i in range(len(idx)):
-        print(i)
-        current_is = idx[i]
-        category = cat[int(database_labels[current_is][0])]
-        if args.dataset == "MNIST":
-            img_orl = Image.fromarray(imgs_database[current_is].numpy())
-        elif args.dataset == "cifar10":
-            img_orl = Image.fromarray(imgs_database[current_is])
-        else:
-            img_orl = Image.open(imgs_database[current_is]).convert('RGB')
-        img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
-        img_orl2 = crop_center(img_orl, 224, 224)
-        cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, location])
-        img_orl2.save(f'vis_pp/orl_{i}_{category}.png')
-        slot_image = np.array(Image.open(f'vis_pp/mask_{i}_{category}.png'), dtype=np.uint8)
-        heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
-        heatmap_on_image.save("vis_pp/" + f'jet_{i}_{category}.png')
+    for j in range(args.num_cpt):
+        root = 'vis_pp/' + "cpt" + str(j) + "/"
+        os.makedirs(root, exist_ok=True)
+        selected = np.array(database_hash)[:, j]
+        ids = np.argsort(-selected, axis=0)
+        idx = ids[:args.top_samples]
+        for i in range(len(idx)):
+            current_is = idx[i]
+            category = cat[int(database_labels[current_is][0])]
+            if args.dataset == "MNIST":
+                img_orl = Image.fromarray(imgs_database[current_is].numpy())
+            elif args.dataset == "cifar10":
+                img_orl = Image.fromarray(imgs_database[current_is])
+            else:
+                img_orl = Image.open(imgs_database[current_is]).convert('RGB')
+            img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
+            img_orl2 = crop_center(img_orl, 224, 224)
+            cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, j])
+            img_orl2.save(f'vis_pp/orl_{i}_{category}.png')
+            slot_image = np.array(Image.open(f'vis_pp/mask_{i}_{category}.png'), dtype=np.uint8)
+            heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
+            heatmap_on_image.save("vis_pp/" + f'jet_{i}_{category}.png')
 
 
 if __name__ == '__main__':
