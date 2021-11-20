@@ -501,11 +501,11 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x):
-        f = self.forward_features(x)
-        f = self.global_pool(f)
+        x = self.forward_features(x)
+        x = self.global_pool(x)
         if self.drop_rate:
-            f = F.dropout(f, p=float(self.drop_rate), training=self.training)
-        x = self.fc(f)
+            x = F.dropout(x, p=float(self.drop_rate), training=self.training)
+        x = self.fc(x)
         return x
 
 

@@ -3,30 +3,25 @@ from torch.utils.data.dataloader import DataLoader
 from loaders.CUB200 import CUB_200
 from loaders.ImageNet import ImageNet
 import numpy as np
+from PIL import Image
 import os
 
 
 def get_train_transformations(args, norm_value):
-    if args.process:
-        aug_extra = []
-    else:
-        aug_extra = [transforms.RandomHorizontalFlip(),
-                    # transforms.RandomVerticalFlip(),
-                    # transforms.RandomApply([transforms.RandomRotation([-45, 45])], p=0.8),
-                    # transforms.RandomApply([transforms.RandomAffine(degrees=0, translate=(0.15, 0.15), fillcolor=(0, 0, 0))],
-                    #                        p=0.8),]
-                     ]
     aug_list = [
-                transforms.Resize([args.img_size, args.img_size]),
+                transforms.Resize((256, 256), Image.BILINEAR),
+                transforms.RandomCrop((224, 224)),
+                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(norm_value[0], norm_value[1])
                 ]
-    aug_list = aug_extra + aug_list
     return transforms.Compose(aug_list)
 
 
 def get_val_transformations(args, norm_value):
-    aug_list = [transforms.Resize([args.img_size, args.img_size]),
+    aug_list = [
+                transforms.Resize((256, 256), Image.BILINEAR),
+                transforms.CenterCrop((224, 224)),
                 transforms.ToTensor(),
                 transforms.Normalize(norm_value[0], norm_value[1])
                 ]
@@ -46,8 +41,8 @@ def get_transform(args):
                                         transforms.Normalize([0.5071, 0.4867, 0.4408], [0.2675, 0.2565, 0.2761])])
         return {"train": transform, "val": transform}
     elif args.dataset == "CUB200" or args.dataset == "ImageNet":
-        transform_train = get_train_transformations(args, [[0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.201]])
-        transform_val = get_val_transformations(args, [[0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.201]])
+        transform_train = get_train_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
+        transform_val = get_val_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
         return {"train": transform_train, "val": transform_val}
 
     raise ValueError(f'unknown {args.dataset}')

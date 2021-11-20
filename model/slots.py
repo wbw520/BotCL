@@ -71,6 +71,13 @@ def vis(slots_vis_raw, loc, size, weight=None, things=None):
         slots_vis = slots_vis_raw[i]
         if weight is not None:
             slots_vis = slots_vis * weight.unsqueeze(-1)
+
+        # overall = slots_vis.sum(0)
+        # overall = (((overall - overall.min()) / (overall.max() - overall.min())) * 255.).reshape((int(size), int(size)))
+        # overall = (overall.cpu().detach().numpy()).astype(np.uint8)
+        # overall = Image.fromarray(overall, mode='L').resize([224, 224], resample=Image.BILINEAR)
+        # overall.save(f'{loc}/overall.png')
+
         slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max() - slots_vis.min()) * 255.).reshape(
             slots_vis.shape[:1] + (int(size), int(size)))
 

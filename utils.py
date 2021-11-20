@@ -114,11 +114,14 @@ def apply_colormap_on_image(org_im, activation, colormap_name):
     """
     # Get colormap
     color_map = mpl_color_map.get_cmap(colormap_name)
+    pp = activation < 80
     no_trans_heatmap = color_map(activation)
     # Change alpha channel in colormap to make sure original image is displayed
     heatmap = copy.copy(no_trans_heatmap)
     heatmap[:, :, 3] = 0.4
-    heatmap = Image.fromarray((heatmap*255).astype(np.uint8))
+    heatmap = heatmap * 255
+    # heatmap[:, :, 3][pp] = 0
+    heatmap = Image.fromarray(heatmap.astype(np.uint8))
     no_trans_heatmap = Image.fromarray((no_trans_heatmap*255).astype(np.uint8))
 
     # Apply heatmap on iamge

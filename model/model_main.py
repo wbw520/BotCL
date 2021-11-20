@@ -17,9 +17,10 @@ class Identical(nn.Module):
 
 def load_backbone(args):
     bone = create_model(args.base_model, pretrained=True,
-                        num_classes=1000, output_stride=32)
+                        num_classes=args.num_classes)
+
     if args.dataset == "MNIST":
-        bone.conv1 = nn.Conv2d(1, 64, 3, stride=2, padding=1, bias=False)
+            bone.conv1 = nn.Conv2d(1, 64, 3, stride=2, padding=1, bias=False)
     bone.global_pool = Identical()
     bone.fc = Identical()
     # fix_parameter(bone, [""], mode="fix")
@@ -32,7 +33,7 @@ class MainModel(nn.Module):
         super(MainModel, self).__init__()
         self.args = args
         self.pre_train = args.pre_train
-        if "50" in args.base_model:
+        if "18" not in args.base_model:
             self.num_features = 2048
         else:
             self.num_features = 512
@@ -42,18 +43,19 @@ class MainModel(nn.Module):
         num_concepts = args.num_cpt
         num_classes = args.num_classes
         self.back_bone = load_backbone(args)
-        self.global_pool = SelectAdaptivePool2d(pool_type="avg")
         self.activation = nn.Tanh()
+        self.vis = vis
 
         if not self.pre_train:
             self.conv1x1 = nn.Conv2d(self.num_features, hidden_dim, kernel_size=(1, 1), stride=(1, 1))
             self.position_emb = build_position_encoding('sine', hidden_dim=hidden_dim)
-            self.slots = ScouterAttention(args, hidden_dim, num_concepts, vis=vis)
+            self.slots = ScouterAttention(args, hidden_dim, num_concepts, vis=self.vis)
             self.norm = nn.BatchNorm2d(hidden_dim)
             self.scale = 1
             self.cls = torch.nn.Linear(num_concepts, num_classes)
         else:
-            self.fc = torch.nn.Linear(self.num_features, num_concepts)
+            self.fc = nn.Linear(self.num_features, args.num_classes)
+            self.drop_rate = 0
 
     def forward(self, x, weight=None, things=None):
         x = self.back_bone(x)
@@ -74,13 +76,15 @@ class MainModel(nn.Module):
             else:
                 cpt_activation = updates
             attn_cls = self.scale * torch.sum(cpt_activation, dim=-1)
-            cpt = (self.activation(attn_cls) - 0.5) * 2
+            cpt = self.activation(attn_cls)
             cls = self.cls(cpt)
-            return cpt, cls, attn, updates
+            return (cpt - 0.5) * 2, cls, attn, updates
         else:
-            x = self.global_pool(x).squeeze(-1).squeeze(-1)
+            x = F.adaptive_max_pool2d(x, 1).squeeze(-1).squeeze(-1)
+            if self.drop_rate > 0:
+                x = F.dropout(x, p=self.drop_rate, training=self.training)
             x = self.fc(x)
-            return self.activation(x)
+            return x
 
 
 # if __name__ == '__main__':

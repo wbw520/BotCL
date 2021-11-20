@@ -30,9 +30,6 @@ class CUB_200(Dataset):
         self._get_id_to_label()
         self._get_path_label()
 
-        self._test_path_label, split = train_test_split(self._test_path_label, train_size=0.2, random_state=1)
-        self._train_path_label.extend(split)
-
     def _train_test_split(self):
 
         for line in open(self.train_test_split_file):

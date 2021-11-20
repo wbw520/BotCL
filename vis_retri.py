@@ -11,6 +11,7 @@ from tools import for_retrival, attention_estimation
 import h5py
 from draw_tools import draw_bar, draw_plot
 import shutil
+from tools import crop_center
 
 shutil.rmtree('vis/', ignore_errors=True)
 shutil.rmtree('vis_pp/', ignore_errors=True)
@@ -42,12 +43,16 @@ def main():
     # # 4    4
 
     # 153  5
-    index = 330
+    index = 2331
 
     # attention statistic
-    att_record = attention_estimation(imgs_database, labels_database, model, transform, device)
-    draw_plot(att_record)
+    name = "n01443537"
+    att_record = attention_estimation(imgs_database, labels_database, model, transform, device, name=name)
+    draw_plot(att_record, name)
 
+    for i in range(len(imgs_database)):
+        if "Yellow_headed_Blackbird" in imgs_database[i]:
+            print(i)
     # data = imgs_val[index]
     # label = labels_val[index]
     data = imgs_database[index]
@@ -60,8 +65,9 @@ def main():
     elif args.dataset == "cifar10":
         img_orl = Image.fromarray(data).resize([224, 224], resample=Image.BILINEAR)
     else:
-        img_orl = Image.open(data).convert('RGB').resize([224, 224], resample=Image.BILINEAR)
-    img_orl.save(f'vis/origin.png')
+        img_orl = Image.open(data).convert('RGB').resize([256, 256], resample=Image.BILINEAR)
+    img_orl2 = crop_center(img_orl, 224, 224)
+    img_orl2.save(f'vis/origin.png')
     cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, None)
     print("-------------------------")
     pp = torch.argmax(pred, dim=-1)
@@ -69,7 +75,7 @@ def main():
     print("--------weight---------")
     w = model.state_dict()["cls.weight"][label]
     w_numpy = np.around(torch.tanh(w).cpu().detach().numpy(), 4)
-    draw_bar(w_numpy)
+    draw_bar(w_numpy, name)
     print(w_numpy)
     print("--------cpt---------")
     print(np.around(cpt.cpu().detach().numpy(), 4))
@@ -79,7 +85,7 @@ def main():
 
     for id in range(args.num_cpt):
         slot_image = np.array(Image.open(f'vis/0_slot_{id}.png'), dtype=np.uint8)
-        heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl, slot_image, 'jet')
+        heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
         heatmap_on_image.save("vis/" + f'0_slot_mask_{id}.png')
 
     # get retrieval cases
@@ -89,14 +95,26 @@ def main():
     test_hash = f1["test_hash"]
     test_labels = f1["test_labels"]
 
-    query = np.zeros((1, args.num_cpt)) - 1
-    location = 14
-    query[0][location] = 1
-    ids = for_retrival(args, np.array(database_hash), query, location=location)
+    location = 9
+
+    # query_sample = np.array([database_hash[index]])
+    # query_sample[0][location] = -1
+    # ids = for_retrival(args, database_hash, query_sample, None)
+    #
+    # for i in range(len(ids)):
+    #     current_is = ids[i]
+    #     img_re = Image.open(imgs_database[current_is]).convert('RGB').resize([224, 224], resample=Image.BILINEAR)
+    #     img_re.save(f"retrieval_results/re_{i}.png")
+
+    selected = np.array(database_hash)[:, location]
+    ids = np.argsort(-selected, axis=0)
+    idx = ids[:100]
     print("-------------------------")
     print("generating retrieval samples")
-    for i in range(len(ids)):
-        current_is = ids[i]
+
+    for i in range(len(idx)):
+        print(i)
+        current_is = idx[i]
         category = cat[int(database_labels[current_is][0])]
         if args.dataset == "MNIST":
             img_orl = Image.fromarray(imgs_database[current_is].numpy())
@@ -104,11 +122,12 @@ def main():
             img_orl = Image.fromarray(imgs_database[current_is])
         else:
             img_orl = Image.open(imgs_database[current_is]).convert('RGB')
-        img_orl = img_orl.resize([224, 224], resample=Image.BILINEAR)
+        img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
+        img_orl2 = crop_center(img_orl, 224, 224)
         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, location])
-        img_orl.save(f'vis_pp/orl_{i}_{category}.png')
+        img_orl2.save(f'vis_pp/orl_{i}_{category}.png')
         slot_image = np.array(Image.open(f'vis_pp/mask_{i}_{category}.png'), dtype=np.uint8)
-        heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl, slot_image, 'jet')
+        heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
         heatmap_on_image.save("vis_pp/" + f'jet_{i}_{category}.png')
 
 

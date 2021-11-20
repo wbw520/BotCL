@@ -1,11 +1,20 @@
 import numpy as np
 import torch
 from PIL import Image
+from tqdm import tqdm
+import torch.nn.functional as F
+import copy
+import matplotlib.cm as mpl_color_map
+import cv2
 
 
-def cal_acc(preds, labels):
+def cal_acc(preds, labels, p):
     with torch.no_grad():
-        pred = preds.argmax(dim=-1)
+        pred = preds.argmax(dim=1)
+        if p:
+            print(pred)
+            print(labels)
+            print("---------------")
         acc = torch.eq(pred, labels).sum().float().item() / labels.size(0)
         return acc
 
@@ -60,7 +69,7 @@ def predict_hash_code(args, model, data_loader, device):
         data, label = data.to(device), label.to(device)
         if not args.pre_train:
             cpt, pred, att, update = model(data)
-            acc = cal_acc(pred, label)
+            acc = cal_acc(pred, label, False)
             accs += acc
         else:
             cpt = model(data)
@@ -117,15 +126,15 @@ def for_retrival(args, database_hash, test_hash, location):
     # database_hash[database_hash >= T] = 1
     # test_hash[test_hash < T] = -1
     # test_hash[test_hash >= T] = 1
-    sim = np.matmul(database_hash[:, location:location+1], test_hash[:, location:location+1].T)
+    sim = np.matmul(database_hash, test_hash.T)
     ids = np.argsort(-sim, axis=0)
     idx = ids[:, 0]
     ids = idx[:R]
     return ids
 
 
-def attention_estimation(data, label, model, transform, device):
-    selected_class = "Yellow_headed_Blackbird"
+def attention_estimation(data, label, model, transform, device, name):
+    selected_class = name
     contains = []
     for i in range(len(data)):
         if selected_class in data[i]:
@@ -134,7 +143,87 @@ def attention_estimation(data, label, model, transform, device):
     attention_record = []
     for i in range(len(contains)):
         img_orl = Image.open(contains[i]).convert('RGB')
-        img_orl = img_orl.resize([224, 224], resample=Image.BILINEAR)
         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, None)
-        attention_record.append(att.sum(-1).squeeze(0).cpu().detach().numpy())
+        attention_record.append((torch.tanh(att.sum(-1))).squeeze(0).cpu().detach().numpy())
     return np.array(attention_record)
+
+
+def crop_center(pil_img, crop_width, crop_height):
+    img_width, img_height = pil_img.size
+    return pil_img.crop(((img_width - crop_width) // 2,
+                         (img_height - crop_height) // 2,
+                         (img_width + crop_width) // 2,
+                         (img_height + crop_height) // 2))
+
+
+def make_grad(args, extractor, output, img_heat, grad_min_level, save_name, target_index, segment=None):
+    img_heat = img_heat.resize((args.img_size, args.img_size), Image.BILINEAR)
+
+    # If None, returns the map for the highest scoring category.
+    # Otherwise, targets the requested index.
+    # target_index = None
+    mask = extractor(target_index, output).cpu().unsqueeze(0).unsqueeze(0)
+    mask = F.interpolate(mask, size=(args.img_size, args.img_size), mode="bilinear")
+    mask = mask.squeeze(dim=0).squeeze(dim=0)
+    mask = mask.detach().numpy()
+    mask = np.maximum(mask, 0)
+    mask = mask - np.min(mask)
+    mask = mask / np.max(mask)
+    mask = np.maximum(mask, grad_min_level)
+    mask = mask - np.min(mask)
+    mask = mask / np.max(mask)
+    if segment is not None:
+        mask = mask * segment
+    show_cam_on_image(img_heat, mask, target_index, save_name)
+    return mask
+
+
+def show_cam_on_image(img, masks, target_index, save_name):
+    final = np.uint8(255*masks)
+
+    mask_image = Image.fromarray(final, mode='L')
+    mask_image.save(f'vis_compare/{save_name}_{target_index}_mask.png')
+
+    heatmap_only, heatmap_on_image = apply_colormap_on_image(img, final, 'jet')
+    heatmap_on_image.save(f'vis_compare/{save_name}_{target_index}.png')
+
+
+def apply_colormap_on_image(org_im, activation, colormap_name):
+    """
+        Apply heatmap on image
+    Args:
+        org_img (PIL img): Original image
+        activation_map (numpy arr): Activation map (grayscale) 0-255
+        colormap_name (str): Name of the colormap
+    """
+    # Get colormap
+    color_map = mpl_color_map.get_cmap(colormap_name)
+    no_trans_heatmap = color_map(activation)
+    # Change alpha channel in colormap to make sure original image is displayed
+    heatmap = copy.copy(no_trans_heatmap)
+    heatmap[:, :, 3] = 0.4
+    heatmap = Image.fromarray((heatmap*255).astype(np.uint8))
+    no_trans_heatmap = Image.fromarray((no_trans_heatmap*255).astype(np.uint8))
+
+    # Apply heatmap on iamge
+    heatmap_on_image = Image.new("RGBA", org_im.size)
+    heatmap_on_image = Image.alpha_composite(heatmap_on_image, org_im.convert('RGBA'))
+    heatmap_on_image = Image.alpha_composite(heatmap_on_image, heatmap)
+    return no_trans_heatmap, heatmap_on_image
+
+
+def shot_game(mask, segment_name):
+    mask = np.array(mask)
+    names = segment_name.split("/")
+    new_name = "/media/wbw/a7f02863-b441-49d0-b546-6ef6fefbbc7e/CUB200/segmentations/" + names[-2] + "/" + names[-1][:-4] + ".png"
+    segment = np.array(cv2.imread(new_name, cv2.IMREAD_UNCHANGED))
+    if segment.shape[-1] == 4:
+        print("--------------------------")
+        return None, None
+    segment = cv2.resize(segment, (224, 224), interpolation=cv2.INTER_NEAREST)
+    segment[segment > 0] = 1
+    overlap_seg = segment * mask
+    hitted = np.sum(overlap_seg) / np.sum(mask)
+    return hitted, segment
+
+

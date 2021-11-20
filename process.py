@@ -35,5 +35,6 @@ def main():
 if __name__ == '__main__':
     args = parser.parse_args()
     args.process = True
+    args.pre_train = False
     main()
 
