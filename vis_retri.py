@@ -1,17 +1,17 @@
 from torchvision import datasets, transforms
-from model.model_main import MainModel
+from model.retrieval.model_main import MainModel
 from configs import parser
 import torch
 import os
 from PIL import Image
 import numpy as np
-from utils import apply_colormap_on_image
+from utils.tools import apply_colormap_on_image
 from loaders.get_loader import load_all_imgs, get_transform
-from tools import for_retrival, attention_estimation
+from utils.tools import for_retrival, attention_estimation
 import h5py
-from draw_tools import draw_bar, draw_plot
+from utils.draw_tools import draw_bar, draw_plot
 import shutil
-from tools import crop_center
+from utils.tools import crop_center
 
 shutil.rmtree('vis/', ignore_errors=True)
 shutil.rmtree('vis_pp/', ignore_errors=True)
@@ -73,6 +73,7 @@ def main():
     # w = model.state_dict()["cls.weight"][label]
     # w_numpy = np.around(torch.tanh(w).cpu().detach().numpy(), 4)
     # draw_bar(w_numpy, name)
+
     # print(w_numpy)
     # print("--------cpt---------")
     # print(np.around(cpt.cpu().detach().numpy(), 4))
@@ -103,6 +104,7 @@ def main():
 
     print("-------------------------")
     print("generating retrieval samples")
+
     for j in range(args.num_cpt):
         root = 'vis_pp/' + "cpt" + str(j) + "/"
         os.makedirs(root, exist_ok=True)
@@ -121,10 +123,10 @@ def main():
             img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
             img_orl2 = crop_center(img_orl, 224, 224)
             cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, j])
-            img_orl2.save(f'vis_pp/orl_{i}_{category}.png')
-            slot_image = np.array(Image.open(f'vis_pp/mask_{i}_{category}.png'), dtype=np.uint8)
+            img_orl2.save(root + f'/orl_{i}_{category}.png')
+            slot_image = np.array(Image.open(root + f'mask_{i}_{category}.png'), dtype=np.uint8)
             heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
-            heatmap_on_image.save("vis_pp/" + f'jet_{i}_{category}.png')
+            heatmap_on_image.save(root + f'jet_{i}_{category}.png')
 
 
 if __name__ == '__main__':

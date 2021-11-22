@@ -86,8 +86,9 @@ def vis(slots_vis_raw, loc, size, weight=None, things=None):
             image = Image.fromarray(image, mode='L').resize([224, 224], resample=Image.BILINEAR)
             if things is not None:
                 order, category, cpt_num = things
+                loc2 = f"vis_pp/cpt{cpt_num}/"
                 if id == cpt_num:
-                    image.save(f'vis_pp/mask_{order}_{category}.png')
+                    image.save(loc2 + f'mask_{order}_{category}.png')
                     break
                 else:
                     continue

@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from utils import AverageMeter, ProgressMeter, show
+from utils.record import AverageMeter, ProgressMeter, show
 
 
 def cal_acc(preds, labels):

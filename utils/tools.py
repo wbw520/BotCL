@@ -148,6 +148,22 @@ def attention_estimation(data, label, model, transform, device, name):
     return np.array(attention_record)
 
 
+def attention_estimation_mnist(data, target, model, transform, transform2, device, name):
+    selected_class = name
+    contains = []
+    for i in range(len(target)):
+        if selected_class == int(target[i]):
+            contains.append(data[i])
+
+    attention_record = []
+    for i in range(len(contains)):
+        img_orl = data[i]
+        img_orl = Image.fromarray(img_orl.numpy())
+        pred, x, att_loss, pp = model(transform2(transform(img_orl)).unsqueeze(0).to(device), None, None)
+        attention_record.append((torch.tanh(pp)).squeeze(0).cpu().detach().numpy())
+    return np.array(attention_record)
+
+
 def crop_center(pil_img, crop_width, crop_height):
     img_width, img_height = pil_img.size
     return pil_img.crop(((img_width - crop_width) // 2,

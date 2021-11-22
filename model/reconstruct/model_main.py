@@ -1,11 +1,11 @@
 import torch.nn as nn
 import torch
-from models.slots import ScouterAttention, vis
-from models.position_encode import build_position_encoding
+from model.reconstruct.slots import ScouterAttention, vis
+from model.reconstruct.position_encode import build_position_encoding
 
 
 class ConceptAutoencoder(nn.Module):
-    def __init__(self, num_concepts, vis=False):
+    def __init__(self, args, num_concepts, vis=False):
         super(ConceptAutoencoder, self).__init__()
         hidden_dim = 32
         self.num_concepts = num_concepts
@@ -36,7 +36,6 @@ class ConceptAutoencoder(nn.Module):
         # x = x.reshape(b, -1)
         x = att_rr.reshape(b, -1)
         pp = x.clone()
-        # x[0][12] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))

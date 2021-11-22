@@ -2,7 +2,7 @@ import os
 import torch
 from termcolor import colored
 from configs import parser
-from utils.engine import train, test_MAP, test
+from utils.engine_retri import train, test_MAP, test
 from model.retrieval.model_main import MainModel
 from loaders.get_loader import loader_generation
 
@@ -40,7 +40,6 @@ def main():
             print("Adjusted learning rate to 1/10")
             optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.1
         train(args, model, device, train_loader1, optimizer, i)
-        # res_loss, att_loss, acc, entropy_l = evaluation(model, device, valloader, reconstruction_loss)
         if not args.pre_train and i % 5 == 0:
             map, acc = test_MAP(args, model, train_loader2, val_loader, device)
             print("acc: ", acc)
