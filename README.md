@@ -25,5 +25,6 @@ python main_retri.py --num_classes 50 --num_cpt 20 --lr 0.0005 --epoch 80 --lr_d
 
 ##### Demo for MNIST and ImageNet
 ```
+python process.py
 python vis_recon.py --num_classes 50 --num_cpt 50 --index 0 --top_sample 20
 ```

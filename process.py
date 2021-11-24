@@ -19,9 +19,9 @@ def main():
 
     train_loader1, train_loader2, val_loader = loader_generation(args)
 
-    print('Waiting for generate the hash code from database')
+    print('Waiting for generating from database')
     database_hash, database_labels, database_acc = predict_hash_code(args, model, train_loader2, device)
-    print('Waiting for generate the hash code from test set')
+    print('Waiting for generating from test set')
     test_hash, test_labels, test_acc = predict_hash_code(args, model, val_loader, device)
 
     f = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.act_type}_{args.cpt_activation}.hdf5", "w")
