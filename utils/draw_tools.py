@@ -36,6 +36,3 @@ def draw_plot(data, name):
     plt.savefig(name + "_heat.pdf", bbox_inches="tight")
     plt.show()
 
-
-dd = [-0.43, 0.29, 0.82, -0.5, 0.36, -0.3, -0.55, 0.75, -0.44, -0.12, 0.94, 0.88, -0.01, -0.22, 0.54, 0.39, 0.01, -0.34, 0.02, -0.04]
-draw_bar(dd, "7")

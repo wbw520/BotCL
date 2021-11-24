@@ -55,12 +55,12 @@ class ConceptAutoencoder(nn.Module):
 class Aggregate(nn.Module):
     def __init__(self, hidden_dim, num_concepts):
         super(Aggregate, self).__init__()
-        self.fc1 = nn.Linear(num_concepts, num_concepts)
+        # self.fc1 = nn.Linear(num_concepts, num_concepts)
         self.fc2 = nn.Linear(num_concepts, 10)
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        x = self.relu(self.fc1(x))
+        # x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 

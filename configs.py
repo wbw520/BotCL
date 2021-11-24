@@ -4,12 +4,12 @@
 
 import argparse
 parser = argparse.ArgumentParser(description="PyTorch implementation of cpt")
-parser.add_argument('--dataset', type=str, default="ImageNet")
+parser.add_argument('--dataset', type=str, default="CUB200")
 parser.add_argument('--dataset_dir', type=str, default="/media/wbw/a7f02863-b441-49d0-b546-6ef6fefbbc7e")
 parser.add_argument('--output_dir', type=str, default="saved_model")
 # ========================= Model Configs ==========================
-parser.add_argument('--num_classes', default=10, help='category for classification')
-parser.add_argument('--num_cpt', default=20, help='number of the concept')
+parser.add_argument('--num_classes', default=50, type=int, help='category for classification')
+parser.add_argument('--num_cpt', default=50, type=int, help='number of the concept')
 parser.add_argument('--base_model', default="resnet18", type=str)
 parser.add_argument('--img_size', default=224, help='size for input image')
 parser.add_argument('--pre_train', default=False, type=bool,
@@ -26,17 +26,18 @@ parser.add_argument('--process', default=False, help='whether process for h5py f
 
 # ========================= Learning Configs ==========================
 parser.add_argument('--start_epoch', default=0, type=int, metavar='N', help='start epoch')
-parser.add_argument('--lr', default=0.001, type=float)
-parser.add_argument('--batch_size', default=256, type=int)
-parser.add_argument('--epoch', default=50, type=int)
-parser.add_argument('--lr_drop', default=30, type=float, nargs="+",
+parser.add_argument('--lr', default=0.0005, type=float)
+parser.add_argument('--batch_size', default=128, type=int)
+parser.add_argument('--epoch', default=80, type=int)
+parser.add_argument('--lr_drop', default=60, type=float, nargs="+",
                     metavar='LRSteps', help='epochs to decay learning rate by 10')
 # ========================= Machine Configs ==========================
 parser.add_argument('--num_workers', default=4, type=int)
 parser.add_argument('--device', default='cuda:0',
                     help='device to use for training / testing')
 # ========================= Demo Configs ==========================
-parser.add_argument('--index', default=8500, type=int)
+parser.add_argument('--index', default=0, type=int)
 parser.add_argument('--top_samples', default=20, type=int)
 parser.add_argument('--demo_cls', default="n01498041", type=str)
+parser.add_argument('--fre', default=3, type=int, help='frequent of show reconstruction results')
 

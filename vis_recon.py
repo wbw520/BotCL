@@ -30,8 +30,7 @@ def main():
     model = ConceptAutoencoder(args, num_concepts=args.num_cpt, vis=True)
     device = torch.device("cuda:0")
     model.to(device)
-    # checkpoint = torch.load(f"saved_model/mnist_model_cpt{args.num_cpt}.pt", map_location="cuda:0")
-    checkpoint = torch.load("saved_model/original.pt")
+    checkpoint = torch.load(f"saved_model/mnist_model_cpt{args.num_cpt}.pt", map_location="cuda:0")
     model.load_state_dict(checkpoint, strict=True)
     model.eval()
 
@@ -39,7 +38,7 @@ def main():
     #0,17   7
     #7,9   9
     #15   5
-    index = 0
+    index = args.index
     img_orl = Image.fromarray((data[index][0].cpu().detach().numpy()*255).astype(np.uint8), mode='L')
     img = data[index].unsqueeze(0).to(device)
     pred, cons, att_loss, pp = model(transform2(img))
@@ -62,7 +61,7 @@ def main():
     is_start = True
     for batch_idx, (data, label) in enumerate(valloader):
         data, label = transform2(data).to(device), label.to(device)
-        pred, out, att_loss, pp = model(data)
+        pred, out, att_loss, pp = model(data, None, "pass")
 
         if is_start:
             all_output = pp.cpu().detach().float()
@@ -75,13 +74,13 @@ def main():
     all_output = all_output.numpy().astype("float32")
     all_label = all_label.squeeze(-1).numpy().astype("float32")
 
+    print("cpt visualization")
     for j in range(args.num_cpt):
         root = 'vis_pp/' + "cpt" + str(j) + "/"
         os.makedirs(root, exist_ok=True)
         selected = all_output[:, j]
         ids = np.argsort(-selected, axis=0)
         idx = ids[:args.top_samples]
-        print(all_label[idx])
         for i in range(len(idx)):
             img_orl = val_imgs[idx[i]]
             img_orl = Image.fromarray(img_orl.numpy())

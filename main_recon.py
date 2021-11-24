@@ -44,7 +44,8 @@ def main():
         record_res.append(res_loss)
         record_att.append(att_loss)
         accs.append(acc)
-        vis_one(model, device, valloader, epoch=i, select_index=1)
+        if i % args.fre == 0:
+            vis_one(model, device, valloader, epoch=i, select_index=1)
         print(record_res)
         print(record_att)
         print(accs)
