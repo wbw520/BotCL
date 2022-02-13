@@ -1,6 +1,4 @@
 # Code for concept
-# Bowen Wang
-# bowen.wang@is.ids.osaka-u.ac.jp
 
 import argparse
 parser = argparse.ArgumentParser(description="PyTorch implementation of cpt")
