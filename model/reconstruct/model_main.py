@@ -8,6 +8,7 @@ class ConceptAutoencoder(nn.Module):
     def __init__(self, args, num_concepts, vis=False):
         super(ConceptAutoencoder, self).__init__()
         hidden_dim = 32
+        self.args = args
         self.num_concepts = num_concepts
         self.conv1 = nn.Conv2d(1, 16, (3, 3), stride=2, padding=1)  # b, 16, 10, 10
         self.conv2 = nn.Conv2d(16, hidden_dim, (3, 3), stride=2, padding=1)  # b, 8, 3, 3
@@ -17,6 +18,8 @@ class ConceptAutoencoder(nn.Module):
         self.tan = nn.Tanh()
         self.sig = nn.Sigmoid()
         self.vis = vis
+        self.scale = 1
+        self.activation = nn.Tanh()
         self.position_emb = build_position_encoding('sine', hidden_dim=hidden_dim)
         self.slots = ScouterAttention(hidden_dim, num_concepts, vis=self.vis)
         self.aggregate = Aggregate(hidden_dim, num_concepts)
@@ -30,16 +33,18 @@ class ConceptAutoencoder(nn.Module):
         b, n, r, c = x.shape
         x = x.reshape((b, n, -1)).permute((0, 2, 1))
         x_pe = x_pe.reshape((b, n, -1)).permute((0, 2, 1))
-        x, attn_loss, att_rr = self.slots(x_pe, x, loc, index)
+        updates, attn = self.slots(x_pe, x, loc, index)
         # print(attn_loss)
+        cpt_activation = attn
+        attn_cls = self.scale * torch.sum(cpt_activation, dim=-1)
 
-        # x = x.reshape(b, -1)
-        x = att_rr.reshape(b, -1)
-        pp = x.clone()
+        x = attn_cls.reshape(b, -1)
+        cpt = self.activation(attn_cls)
+        # x[0][1] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))
-        return pred, x, attn_loss, pp
+        return (cpt - 0.5) * 2, pred, x, attn, updates
 
         # x = x.reshape(b*self.num_concepts, -1)
         # x = self.relu(self.fc1(x))

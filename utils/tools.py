@@ -138,10 +138,12 @@ def attention_estimation(data, label, model, transform, device, name):
     contains = []
     for i in range(len(data)):
         if selected_class in data[i]:
+            print(i)
             contains.append(data[i])
 
     attention_record = []
     for i in range(len(contains)):
+        print(contains[i])
         img_orl = Image.open(contains[i]).convert('RGB')
         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, None)
         attention_record.append((torch.tanh(att.sum(-1))).squeeze(0).cpu().detach().numpy())
@@ -173,7 +175,7 @@ def crop_center(pil_img, crop_width, crop_height):
 
 
 def make_grad(args, extractor, output, img_heat, grad_min_level, save_name, target_index, segment=None):
-    img_heat = img_heat.resize((args.img_size, args.img_size), Image.BILINEAR)
+    # img_heat = img_heat.resize((args.img_size, args.img_size), Image.BILINEAR)
 
     # If None, returns the map for the highest scoring category.
     # Otherwise, targets the requested index.
@@ -190,7 +192,7 @@ def make_grad(args, extractor, output, img_heat, grad_min_level, save_name, targ
     mask = mask / np.max(mask)
     if segment is not None:
         mask = mask * segment
-    show_cam_on_image(img_heat, mask, target_index, save_name)
+    # show_cam_on_image(img_heat, mask, target_index, save_name)
     return mask
 
 

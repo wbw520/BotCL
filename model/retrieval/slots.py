@@ -13,6 +13,7 @@ class ScouterAttention(nn.Module):
         self.slot_mode = args.act_type
         self.iters = iters
         self.eps = eps
+        # self.scale = (dim // num_concept) ** -0.5
         self.scale = dim ** -0.5
 
         # random seed init
@@ -55,7 +56,7 @@ class ScouterAttention(nn.Module):
             else:
                 raise RuntimeError(f"unsupported input to tensor dot, got slot mode={self.slot_mode}")
 
-            # attn2 = attn / (attn.sum(dim=-1, keepdim=True) + self.eps)
+            # attn = attn / attn.sum(dim=-1, keepdim=True)
             updates = torch.einsum('bjd,bij->bid', inputs, attn)
             # updates = updates / (attn.sum(-1).unsqueeze(-1) + 1)
 
@@ -70,26 +71,29 @@ def vis(slots_vis_raw, loc, size, weight=None, things=None):
     for i in range(b):
         slots_vis = slots_vis_raw[i]
         if weight is not None:
+            Nos = weight[1]
+            weight = weight[0]
             slots_vis = slots_vis * weight.unsqueeze(-1)
 
-        # overall = slots_vis.sum(0)
-        # overall = (((overall - overall.min()) / (overall.max() - overall.min())) * 255.).reshape((int(size), int(size)))
-        # overall = (overall.cpu().detach().numpy()).astype(np.uint8)
-        # overall = Image.fromarray(overall, mode='L').resize([224, 224], resample=Image.BILINEAR)
-        # overall.save(f'{loc}/overall.png')
+            overall = slots_vis.sum(0)
+            overall = (((overall - overall.min()) / (overall.max() - overall.min())) * 255.).reshape((int(size), int(size)))
+            overall = (overall.cpu().detach().numpy()).astype(np.uint8)
+            overall = Image.fromarray(overall, mode='L').resize([224, 224], resample=Image.BILINEAR)
+            overall.save(f'{loc}/overall_{Nos}.png')
 
-        slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max() - slots_vis.min()) * 255.).reshape(
-            slots_vis.shape[:1] + (int(size), int(size)))
+        else:
+            slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max() - slots_vis.min()) * 255.).reshape(
+                slots_vis.shape[:1] + (int(size), int(size)))
 
-        slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
-        for id, image in enumerate(slots_vis):
-            image = Image.fromarray(image, mode='L').resize([224, 224], resample=Image.BILINEAR)
-            if things is not None:
-                order, category, cpt_num = things
-                loc2 = f"vis_pp/cpt{cpt_num}/"
-                if id == cpt_num:
-                    image.save(loc2 + f'mask_{order}_{category}.png')
-                    break
-                else:
-                    continue
-            image.save(f'{loc}/{i}_slot_{id:d}.png')
+            slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
+            for id, image in enumerate(slots_vis):
+                image = Image.fromarray(image, mode='L').resize([224, 224], resample=Image.BILINEAR)
+                if things is not None:
+                    order, category, cpt_num = things
+                    loc2 = f"vis_pp/cpt{cpt_num}/"
+                    if id == cpt_num:
+                        image.save(loc2 + f'mask_{order}_{category}.png')
+                        break
+                    else:
+                        continue
+                image.save(f'{loc}/{i}_slot_{id:d}.png')

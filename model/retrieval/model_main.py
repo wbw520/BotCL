@@ -59,7 +59,7 @@ class MainModel(nn.Module):
 
     def forward(self, x, weight=None, things=None):
         x = self.back_bone(x)
-        x = x.view(x.size(0), self.num_features, self.feature_size, self.feature_size)
+        # x = x.view(x.size(0), self.num_features, self.feature_size, self.feature_size)
         if not self.pre_train:
             x = self.conv1x1(x)
             x = self.norm(x)

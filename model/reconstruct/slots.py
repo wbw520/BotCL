@@ -67,10 +67,7 @@ class ScouterAttention(nn.Module):
             if index != "pass":
                 slots_vis_raw = attn.clone()
                 vis(slots_vis_raw, loc, 7, index)
-        attn_relu = torch.relu(attn)
-        attn_rr = torch.sum(attn_relu, dim=-1)
-        slot_loss = torch.sum(attn_relu, (0, 1, 2)) / attn_relu.size(0) / attn_relu.size(1) / attn_relu.size(2)
-        return updates, torch.pow(slot_loss, self.power), attn_rr
+        return updates, attn
 
 
 def vis(slots_vis_raw, loc, size, index):

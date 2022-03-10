@@ -41,10 +41,6 @@ class MakeImage():
         self.image_root = os.path.join(args.dataset_dir, args.dataset, "ILSVRC/Data/CLS-LOC")
         self.category = get_name(self.image_root + "/train/")
         self.used_cat = self.category[:args.num_classes]
-        # self.used_cat = ["n03594945", "n03345487", "n02701002", "n04285008", "n03977966", "n02930766", "n03770679"]
-        # print(len(self.used_cat))
-        # print(self.used_cat)
-        # self.used_cat = ["n03345487", "n02701002", "n04285008", "n03977966", "n02930766", "n03770679"]
 
     def get_data(self):
         train = self.get_img(self.used_cat, "train")

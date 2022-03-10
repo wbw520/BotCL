@@ -27,6 +27,8 @@ class CUB_200(Dataset):
         self._test_path_label = []
 
         self._train_test_split()
+        self._test_ids, self.extra = train_test_split(self._test_ids, train_size=0.5, random_state=1)
+        self._train_ids = self._train_ids + self.extra
         self._get_id_to_label()
         self._get_path_label()
 
