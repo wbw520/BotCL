@@ -22,7 +22,7 @@ python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --to
 ```
 
 #### Usage for CUB200, ImageNet and Custom
-We first pre-train the backbone and then train the whole model. For ImageNet and Custom, just change the name for dataset. The generated concept is different upon to the training. Thus, your can adjust the weight and train several times to get the satisfying concepts.
+We first pre-train the backbone and then train the whole model. For ImageNet and Custom, just change the name for dataset.
 ```
 Pre-traing of backbone:
 python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --pre_train True --dataset CUB200 --dataset_dir "your dir"
