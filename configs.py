@@ -20,7 +20,7 @@ parser.add_argument('--feature_size', default=7, help='size of the feature from 
 parser.add_argument('--process', default=False, help='whether process for h5py file')
 parser.add_argument('--layer', default=1, help='layers for fc, default as one')
 # ========================= Training Configs ==========================
-parser.add_argument('--weak_supervision_bias', type=float, default=0.1, help='weight fot the weak supervision branch')
+parser.add_argument('--weak_supervision_bias', type=float, default=1, help='weight fot the weak supervision branch')
 parser.add_argument('--att_bias', type=float, default=0.1, help='used to prevent overflow, default as 0.1')
 parser.add_argument('--quantity_bias', type=float, default=0.5, help='force each concept to be binary')
 parser.add_argument('--distinctiveness_bias', type=float, default=1, help='refer to paper')
@@ -36,7 +36,7 @@ parser.add_argument('--lr_drop', default=40, type=float, nargs="+",
 parser.add_argument('--num_workers', default=4, type=int)
 parser.add_argument('--device', default='cuda:0', help='device to use for training / testing')
 # ========================= Demo Configs ==========================
-parser.add_argument('--index', default=100, type=int)
+parser.add_argument('--index', default=300, type=int)
 parser.add_argument('--use_weight', default=False, help='whether use fc weight for the generation of attention mask')
 parser.add_argument('--top_samples', default=50, type=int, help='top n activated samples')
 # parser.add_argument('--demo_cls', default="n01498041", type=str)
