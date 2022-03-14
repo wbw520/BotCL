@@ -62,12 +62,6 @@ def train(args, model, device, loader, optimizer, epoch):
             loss_total = 0.1 * retri_loss + s * attn_loss + t * quantity_loss + loss_pred - q * consistence_loss + k * batch_dis_loss
         else:
             cpt = F.log_softmax(model(data), dim=-1)
-            # retri_loss, quantity_loss = get_retrieval_loss(cpt, label, args.num_classes, device)
-            # retri_losses.update(retri_loss.item())
-            # q_losses.update(quantity_loss.item())
-            # loss_total = retri_loss + 0.1 * quantity_loss
-
-            # cpt = F.log_softmax(cpt, dim=1)
             retri_loss = F.nll_loss(cpt, label)
             acc = cal_acc(cpt, label, False)
             pred_acces.update(acc)

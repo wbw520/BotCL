@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from model.reconstruct.slots import ScouterAttention, vis
+from model.reconstruct.slots import ScouterAttention
 from model.reconstruct.position_encode import build_position_encoding
 
 
@@ -22,9 +22,9 @@ class ConceptAutoencoder(nn.Module):
         self.activation = nn.Tanh()
         self.position_emb = build_position_encoding('sine', hidden_dim=hidden_dim)
         self.slots = ScouterAttention(hidden_dim, num_concepts, vis=self.vis)
-        self.aggregate = Aggregate(hidden_dim, num_concepts)
+        self.aggregate = Aggregate(args, num_concepts)
 
-    def forward(self, x, loc=None, index=None):
+    def forward(self, x, loc=None, index=None, deactivate=None):
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
 
@@ -34,38 +34,31 @@ class ConceptAutoencoder(nn.Module):
         x = x.reshape((b, n, -1)).permute((0, 2, 1))
         x_pe = x_pe.reshape((b, n, -1)).permute((0, 2, 1))
         updates, attn = self.slots(x_pe, x, loc, index)
-        # print(attn_loss)
         cpt_activation = attn
         attn_cls = self.scale * torch.sum(cpt_activation, dim=-1)
 
         x = attn_cls.reshape(b, -1)
         cpt = self.activation(attn_cls)
-        # x[0][1] = 0
+        if deactivate is not None:
+            x[0][deactivate] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))
-        return (cpt - 0.5) * 2, pred, x, attn, updates
-
-        # x = x.reshape(b*self.num_concepts, -1)
-        # x = self.relu(self.fc1(x))
-        # x = self.fc2(x).reshape(b, self.num_concepts, -1)
-        # if self.vis:
-        #     vis_raw = self.sig(x.clone())
-        #     vis(vis_raw, "vis_pp", 28)
-        #
-        # x = self.sig(x.sum(1))
-        # return x, attn_loss
+        return cpt, pred, x, attn, updates
 
 
 class Aggregate(nn.Module):
-    def __init__(self, hidden_dim, num_concepts):
+    def __init__(self, args, num_concepts):
         super(Aggregate, self).__init__()
-        # self.fc1 = nn.Linear(num_concepts, num_concepts)
+        self.args = args
+        if args.layer != 1:
+            self.fc1 = nn.Linear(num_concepts, num_concepts)
         self.fc2 = nn.Linear(num_concepts, 10)
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        # x = self.relu(self.fc1(x))
+        if self.args.layer != 1:
+            x = self.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 

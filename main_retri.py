@@ -41,7 +41,7 @@ def main():
             print("Adjusted learning rate to 1/10")
             optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.1
         train(args, model, device, train_loader1, optimizer, i)
-        if not args.pre_train and i % 10 == 0 and i > 0:
+        if i == args.epoch - 1:
             map, acc = test_MAP(args, model, train_loader2, val_loader, device)
             print("acc: ", acc)
             print("map", map)

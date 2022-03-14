@@ -91,12 +91,12 @@ def main():
         heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
         heatmap_on_image.save("vis/" + f'0_slot_mask_{id}.png')
 
-    # # get retrieval cases
-    # f1 = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.act_type}_{args.cpt_activation}.hdf5", 'r')
-    # database_hash = f1["database_hash"]
-    # database_labels = f1["database_labels"]
-    # test_hash = f1["test_hash"]
-    # test_labels = f1["test_labels"]
+    # get retrieval cases
+    f1 = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.act_type}_{args.cpt_activation}.hdf5", 'r')
+    database_hash = f1["database_hash"]
+    database_labels = f1["database_labels"]
+    test_hash = f1["test_hash"]
+    test_labels = f1["test_labels"]
 
     # query_sample = np.array([database_hash[index]])
     # query_sample[0][location] = -1
@@ -110,28 +110,28 @@ def main():
     print("-------------------------")
     print("generating retrieval samples")
 
-    # for j in range(args.num_cpt):
-    #     root = 'vis_pp/' + "cpt" + str(j) + "/"
-    #     os.makedirs(root, exist_ok=True)
-    #     selected = np.array(database_hash)[:, j]
-    #     ids = np.argsort(-selected, axis=0)
-    #     idx = ids[:args.top_samples]
-    #     for i in range(len(idx)):
-    #         current_is = idx[i]
-    #         category = cat[int(database_labels[current_is][0])]
-    #         if args.dataset == "MNIST":
-    #             img_orl = Image.fromarray(imgs_database[current_is].numpy())
-    #         elif args.dataset == "cifar10":
-    #             img_orl = Image.fromarray(imgs_database[current_is])
-    #         else:
-    #             img_orl = Image.open(imgs_database[current_is]).convert('RGB')
-    #         img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
-    #         img_orl2 = crop_center(img_orl, 224, 224)
-    #         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, j])
-    #         img_orl2.save(root + f'/orl_{i}_{category}.png')
-    #         slot_image = np.array(Image.open(root + f'mask_{i}_{category}.png'), dtype=np.uint8)
-    #         heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
-    #         heatmap_on_image.save(root + f'jet_{i}_{category}.png')
+    for j in range(args.num_cpt):
+        root = 'vis_pp/' + "cpt" + str(j) + "/"
+        os.makedirs(root, exist_ok=True)
+        selected = np.array(database_hash)[:, j]
+        ids = np.argsort(-selected, axis=0)
+        idx = ids[:args.top_samples]
+        for i in range(len(idx)):
+            current_is = idx[i]
+            category = cat[int(database_labels[current_is][0])]
+            if args.dataset == "MNIST":
+                img_orl = Image.fromarray(imgs_database[current_is].numpy())
+            elif args.dataset == "cifar10":
+                img_orl = Image.fromarray(imgs_database[current_is])
+            else:
+                img_orl = Image.open(imgs_database[current_is]).convert('RGB')
+            img_orl = img_orl.resize([256, 256], resample=Image.BILINEAR)
+            img_orl2 = crop_center(img_orl, 224, 224)
+            cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, [i, category, j])
+            img_orl2.save(root + f'/orl_{i}_{category}.png')
+            slot_image = np.array(Image.open(root + f'mask_{i}_{category}.png'), dtype=np.uint8)
+            heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl2, slot_image, 'jet')
+            heatmap_on_image.save(root + f'jet_{i}_{category}.png')
 
 
 if __name__ == '__main__':

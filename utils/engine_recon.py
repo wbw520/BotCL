@@ -11,7 +11,7 @@ def cal_acc(preds, labels):
         return acc
 
 
-def train(model, device, loader, rec_loss, optimizer, epoch):
+def train(args, model, device, loader, rec_loss, optimizer, epoch):
     recon_losses = AverageMeter('Reconstruction Loss', ':.4')
     att_losses = AverageMeter('Att Loss', ':.4')
     pred_losses = AverageMeter('Pred Loss', ':.4')
@@ -34,7 +34,7 @@ def train(model, device, loader, rec_loss, optimizer, epoch):
         quantity_loss = quantization_loss(cpt)
         batch_dis_loss = batch_cpt_discriminate(update, att)
         consistence_loss = att_consistence(update, att)
-        att_loss = att_area_loss(att)
+        att_loss = att_area_loss(att)  # attention loss used to prevent overflow
 
         recon_losses.update(reconstruction_loss.item())
         att_losses.update(att_loss.item())
@@ -44,7 +44,8 @@ def train(model, device, loader, rec_loss, optimizer, epoch):
         batch_dis_losses.update(batch_dis_loss.item())
         consistence_losses.update(consistence_loss.item())
 
-        loss_total = 1 * reconstruction_loss + 5 * att_loss + loss_pred + 0 * quantity_loss + 0 * batch_dis_loss + 0 * consistence_loss
+        loss_total = args.weak_supervision_bias * reconstruction_loss + args.att_bias * att_loss + loss_pred + args.quantity_bias * quantity_loss + \
+                     args.distinctiveness_bias * batch_dis_loss + args.consistence_bias * consistence_loss
 
         optimizer.zero_grad()
         loss_total.backward()

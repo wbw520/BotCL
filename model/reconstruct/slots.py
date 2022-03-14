@@ -76,11 +76,12 @@ def vis(slots_vis_raw, loc, size, index):
         loc1, loc2 = loc
     else:
         loc1 = "vis"
+
     for i in range(b):
         slots_vis = slots_vis_raw[i]
         slots_vis = ((slots_vis - slots_vis.min()) / (slots_vis.max() - slots_vis.min()) * 255.).reshape(
             slots_vis.shape[:1] + (int(size), int(size)))
-        # slots_vis[slots_vis < (torch.mean(slots_vis, dim=(0, 1, 2)) + 50)] = 0
+
         slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
         for id, image in enumerate(slots_vis):
             image = Image.fromarray(image, mode='L').resize([28, 28], resample=Image.BILINEAR)
