@@ -10,8 +10,7 @@ parser.add_argument('--num_classes', default=50, type=int, help='category for cl
 parser.add_argument('--num_cpt', default=20, type=int, help='number of the concept')
 parser.add_argument('--base_model', default="resnet18", type=str)
 parser.add_argument('--img_size', default=224, help='size for input image')
-parser.add_argument('--pre_train', default=False, type=bool,
-                    help='whether pre-train the model')
+parser.add_argument('--pre_train', default=False, type=bool, help='whether pre-train the model')
 parser.add_argument('--aug', default=True, type=bool,
                     help='whether use augmentation')
 parser.add_argument('--num_retrieval', default=20, help='number of the top retrieval images')

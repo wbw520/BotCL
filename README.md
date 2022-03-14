@@ -25,10 +25,10 @@ python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --to
 We first pre-train the backbone and then train the whole model. For ImageNet and Custom, just change the name for dataset. The generated concept is different upon to the training. Thus, your can adjust the weight and train several times to get the satisfying concepts.
 ```
 Pre-traing of backbone:
-python main_retri.py --num_classes 50 --num_cpt 20 --lr 0.0005 --epoch 60 --lr_drop 40 --pre_train True --dataset CUB200 --dataset_dir "your dir"
+python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --pre_train True --dataset CUB200 --dataset_dir "your dir"
 
 Training for BotCL:
-python main_retri.py --num_classes 50 --num_cpt 20 --lr 0.0005 --epoch 80 --lr_drop 60 --pre_train False --dataset CUB200 --dataset_dir "your dir" --weak_supervision_bias 1 --quantity_bias 0.5 --distinctiveness_bias 1 --consistence_bias 1
+python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --dataset CUB200 --dataset_dir "your dir" --weak_supervision_bias 1 --quantity_bias 0.5 --distinctiveness_bias 1 --consistence_bias 1
 ```
 
 Use the following commend to visualize the learned concept.
@@ -38,6 +38,6 @@ First run process.py to extarct the activation for all dataset samples:
 python process.py
 
 Then see the generated concepts by:
-python vis_retri.py --num_classes 20 --num_cpt 50 --index 300 --top_sample 20 --top_sample 50 --dataset CUB200
+python vis_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 300 --top_sample 20 --dataset CUB200
 ```
 
