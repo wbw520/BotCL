@@ -66,39 +66,39 @@ def main():
     # print(att_record.shape)
     # draw_plot(att_record, "7")
 
+    if args.deactivate == -1:
+        is_start = True
+        for batch_idx, (data, label) in enumerate(valloader):
+            data, label = transform2(data).to(device), label.to(device)
+            cpt, pred, out, att_loss, pp = model(data, None, "pass")
 
-    is_start = True
-    for batch_idx, (data, label) in enumerate(valloader):
-        data, label = transform2(data).to(device), label.to(device)
-        cpt, pred, out, att_loss, pp = model(data, None, "pass")
+            if is_start:
+                all_output = cpt.cpu().detach().float()
+                all_label = label.unsqueeze(-1).cpu().detach().float()
+                is_start = False
+            else:
+                all_output = torch.cat((all_output, cpt.cpu().detach().float()), 0)
+                all_label = torch.cat((all_label, label.unsqueeze(-1).cpu().detach().float()), 0)
 
-        if is_start:
-            all_output = cpt.cpu().detach().float()
-            all_label = label.unsqueeze(-1).cpu().detach().float()
-            is_start = False
-        else:
-            all_output = torch.cat((all_output, cpt.cpu().detach().float()), 0)
-            all_label = torch.cat((all_label, label.unsqueeze(-1).cpu().detach().float()), 0)
+        all_output = all_output.numpy().astype("float32")
+        all_label = all_label.squeeze(-1).numpy().astype("float32")
 
-    all_output = all_output.numpy().astype("float32")
-    all_label = all_label.squeeze(-1).numpy().astype("float32")
-
-    print("cpt visualization")
-    for j in range(args.num_cpt):
-        root = 'vis_pp/' + "cpt" + str(j+1) + "/"
-        os.makedirs(root, exist_ok=True)
-        selected = all_output[:, j]
-        ids = np.argsort(-selected, axis=0)
-        idx = ids[:args.top_samples]
-        for i in range(len(idx)):
-            img_orl = val_imgs[idx[i]]
-            img_orl = Image.fromarray(img_orl.numpy())
-            img_orl.save(root + f'/origin_{i}.png')
-            img = transform2(transform(img_orl))
-            cpt, pred, out, att_loss, pp = model(img.unsqueeze(0).to(device), ["vis", root], [j, i])
-            slot_image = np.array(Image.open(root + f'{i}.png'), dtype=np.uint8)
-            heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl, slot_image, 'jet')
-            heatmap_on_image.save(root + f'mask_{i}.png')
+        print("cpt visualization")
+        for j in range(args.num_cpt):
+            root = 'vis_pp/' + "cpt" + str(j+1) + "/"
+            os.makedirs(root, exist_ok=True)
+            selected = all_output[:, j]
+            ids = np.argsort(-selected, axis=0)
+            idx = ids[:args.top_samples]
+            for i in range(len(idx)):
+                img_orl = val_imgs[idx[i]]
+                img_orl = Image.fromarray(img_orl.numpy())
+                img_orl.save(root + f'/origin_{i}.png')
+                img = transform2(transform(img_orl))
+                cpt, pred, out, att_loss, pp = model(img.unsqueeze(0).to(device), ["vis", root], [j, i])
+                slot_image = np.array(Image.open(root + f'{i}.png'), dtype=np.uint8)
+                heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl, slot_image, 'jet')
+                heatmap_on_image.save(root + f'mask_{i}.png')
 
 
 if __name__ == '__main__':

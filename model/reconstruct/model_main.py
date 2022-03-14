@@ -24,7 +24,7 @@ class ConceptAutoencoder(nn.Module):
         self.slots = ScouterAttention(hidden_dim, num_concepts, vis=self.vis)
         self.aggregate = Aggregate(args, num_concepts)
 
-    def forward(self, x, loc=None, index=None, deactivate=None):
+    def forward(self, x, loc=None, index=None):
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
 
@@ -39,8 +39,8 @@ class ConceptAutoencoder(nn.Module):
 
         x = attn_cls.reshape(b, -1)
         cpt = self.activation(attn_cls)
-        if deactivate != -1:
-            x[0][deactivate-1] = 0
+        if self.args.deactivate != -1:
+            x[0][self.args.deactivate-1] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))
