@@ -6,6 +6,7 @@ from utils.engine_recon import train, evaluation, vis_one
 import torch.nn as nn
 from configs import parser
 from model.reconstruct.model_main import ConceptAutoencoder
+import os
 
 
 def main():
@@ -56,4 +57,5 @@ if __name__ == '__main__':
     args.quantity_bias = 0
     args.distinctiveness_bias = 0
     args.consistence_bias = 0
+    os.makedirs(args.output_dir + '/', exist_ok=True)
     main()
