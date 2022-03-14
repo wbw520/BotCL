@@ -60,23 +60,23 @@ def main():
     img_orl2 = crop_center(img_orl, 224, 224)
     img_orl2.save(f'vis/origin.png')
     cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), None, None)
-    print(pred.shape)
     print("-------------------------")
     pp = torch.argmax(pred, dim=-1)
     print("predicted as: ", cat[pp])
-    print("--------weight---------")
 
     w = model.state_dict()["cls.weight"][label]
     w_numpy = np.around(torch.tanh(w).cpu().detach().numpy(), 4)
+    ccc = np.around(cpt.cpu().detach().numpy(), 4)
     # draw_bar(w_numpy, name)
 
-    print(w_numpy)
-    print("--------cpt---------")
-    ccc = np.around(cpt.cpu().detach().numpy(), 4)
-    print(ccc)
+    # print("--------weight---------")
+    # print(w_numpy)
+
+    # print("--------cpt---------")
+    # print(ccc)
     print("------sum--------")
     print((ccc/2 + 0.5) * w_numpy)
-    if args.weight_att:
+    if args.use_weight:
         w[w < 0] = 0
         cpt, pred, att, update = model(transform(img_orl).unsqueeze(0).to(device), w)
 
@@ -86,7 +86,7 @@ def main():
         heatmap_on_image.save("vis/" + f'0_slot_mask_{id}.png')
 
     # get retrieval cases
-    f1 = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.act_type}_{args.cpt_activation}.hdf5", 'r')
+    f1 = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.cpt_activation}.hdf5", 'r')
     database_hash = f1["database_hash"]
     database_labels = f1["database_labels"]
     test_hash = f1["test_hash"]
@@ -102,7 +102,7 @@ def main():
     #     img_re.save(f"retrieval_results/re_{i}.png")
 
     print("-------------------------")
-    print("generating retrieval samples")
+    print("generating concept samples")
 
     for j in range(args.num_cpt):
         root = 'vis_pp/' + "cpt" + str(j) + "/"

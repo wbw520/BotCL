@@ -24,7 +24,7 @@ def main():
     print('Waiting for generating from test set')
     test_hash, test_labels, test_acc = predict_hash_code(args, model, val_loader, device)
 
-    f = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.act_type}_{args.cpt_activation}.hdf5", "w")
+    f = h5py.File(f"data_map/{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_{args.cpt_activation}.hdf5", "w")
     d1 = f.create_dataset("database_hash", data=database_hash)
     d2 = f.create_dataset("database_labels", data=database_labels)
     d6 = f.create_dataset("test_hash", data=test_hash)

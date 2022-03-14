@@ -8,16 +8,13 @@ from .tools import cal_acc, predict_hash_code, mean_average_precision
 
 def train(args, model, device, loader, optimizer, epoch):
     retri_losses = AverageMeter('Retri_loss Loss', ':.4')
-    att_losses = AverageMeter('Att Loss', ':.4')
+    # att_losses = AverageMeter('Att Loss', ':.4')
     q_losses = AverageMeter('Q_loss', ':.4')
     batch_dis_losses = AverageMeter('Dis_loss_batch', ':.4')
     consistence_losses = AverageMeter('Consistence_loss', ':.4')
-    att_binary_losses = AverageMeter('Att_binary', ':.4')
-    att_dis_losses = AverageMeter('Att_dis', ':.4')
     pred_acces = AverageMeter('Acc', ':.4')
     if not args.pre_train:
-        show_items = [retri_losses, q_losses, att_losses, pred_acces, batch_dis_losses, consistence_losses,
-                      att_binary_losses, att_dis_losses]
+        show_items = [retri_losses, q_losses, pred_acces, batch_dis_losses, consistence_losses]
     else:
         show_items = [pred_acces]
     progress = ProgressMeter(len(loader),
@@ -35,17 +32,13 @@ def train(args, model, device, loader, optimizer, epoch):
             acc = cal_acc(pred, label, False)
             batch_dis_loss = batch_cpt_discriminate(update, att)
             consistence_loss = att_consistence(update, att)
-            att_binary_loss = att_binary(att)
             attn_loss = att_area_loss(att)
-            att_dis_loss = att_discriminate(att)
 
             retri_losses.update(retri_loss.item())
-            att_losses.update(attn_loss.item())
+            # att_losses.update(attn_loss.item())
             q_losses.update(quantity_loss.item())
             batch_dis_losses.update(batch_dis_loss.item())
             consistence_losses.update(consistence_loss.item())
-            att_binary_losses.update(att_binary_loss.item())
-            att_dis_losses.update(att_dis_loss.item())
             pred_acces.update(acc)
 
             loss_total = args.weak_supervision_bias * retri_loss + args.att_bias * attn_loss + args.quantity_bias * quantity_loss + \
