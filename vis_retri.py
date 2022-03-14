@@ -33,17 +33,11 @@ def main():
     model.to(device)
     checkpoint = torch.load(os.path.join(args.output_dir,
             f"{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt{args.num_cpt}_" +
-    f"{'use_slot_' + args.act_type + '_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"), map_location="cuda:0")
+    f"{'use_slot_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"), map_location="cuda:0")
     model.load_state_dict(checkpoint, strict=True)
     model.eval()
 
-    # # 0, 17   7
-    # # 7, 9, 16, 12   9
-    # # 15    5
-    # # 4    4
-
-    # 153  5
-    index = 467
+    index = args.index
 
     # # attention statistic
     # name = "Yellow_headed_Blackbird"

@@ -9,7 +9,6 @@ class ScouterAttention(nn.Module):
     def __init__(self, dim, num_concept, iters=1, eps=1e-8, vis=False, power=1, to_k_layer=3):
         super().__init__()
         self.num_slots = num_concept
-        self.slot_mode = "level_2"
         self.iters = iters
         self.eps = eps
         self.scale = dim ** -0.5
@@ -45,14 +44,10 @@ class ScouterAttention(nn.Module):
             dots = torch.einsum('bid,bjd->bij', q, k) * self.scale
             dots = torch.div(dots, dots.sum(2).expand_as(dots.permute([2, 0, 1])).permute([1, 2, 0])) * \
                    dots.sum(2).sum(1).expand_as(dots.permute([1, 2, 0])).permute([2, 0, 1])
-            if self.slot_mode == "level_1":
-                attn = torch.sigmoid(dots)
-            elif self.slot_mode == "level_2":
-                attn1 = dots.softmax(dim=1)
-                attn2 = dots.sigmoid()
-                attn = attn1 * attn2
-            else:
-                raise RuntimeError(f"unsupported input to tensor dot, got slot mode={self.slot_mode}")
+
+            attn1 = dots.softmax(dim=1)
+            attn2 = dots.sigmoid()
+            attn = attn1 * attn2
 
             updates = torch.einsum('bjd,bij->bid', inputs_x, attn)
             updates = updates / inputs_x.size(2)

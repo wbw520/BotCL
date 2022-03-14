@@ -16,7 +16,7 @@ Using the following command for training
 ```
 python main_recon.py --num_classes 10 --num_cpt 20 --lr 0.001 --epoch 50 --lr_drop 30
 ```
-Use the following command for the inference of a sample. You can change the index to select different input samples. Change deactivate (deactivate one concept, 1 to num_class) and see the changes of reconstruction. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
+Use the following command for the inference of a sample. You can change the index to select different input samples. Change deactivate (deactivate one concept, 1 to num_class) and see the changes of reconstruction. Change top-sample (top-10 in the paper) to show more details for a concept. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
 ```
 python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
 ```
@@ -34,6 +34,10 @@ python main_retri.py --num_classes 50 --num_cpt 20 --lr 0.0005 --epoch 80 --lr_d
 Use the following commend to visualize the learned concept.
 
 ```
+First run process.py the extarct the activation for all dataset samples:
+python process.py
+
+Then see the generated concepts by:
 python vis_retri.py --num_classes 20 --num_cpt 50 --index 0 --top_sample 20 --top_sample 50
 ```
 

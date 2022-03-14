@@ -14,15 +14,14 @@ parser.add_argument('--pre_train', default=True, type=bool,
                     help='whether pre-train the model')
 parser.add_argument('--aug', default=True, type=bool,
                     help='whether use augmentation')
-parser.add_argument('--act_type', default="sigmoid", help='the activation for the slot attention')
 parser.add_argument('--num_retrieval', default=20, help='number of the top retrieval images')
 parser.add_argument('--weight_att', default=False, help='using fc weight for att visualization')
-parser.add_argument('--cpt_activation', default="att", help='the type to form cpt activation')
+parser.add_argument('--cpt_activation', default="att", help='the type to form cpt activation, default att using attention')
 parser.add_argument('--feature_size', default=7, help='size of the feature from backbone')
 parser.add_argument('--process', default=False, help='whether process for h5py file')
 parser.add_argument('--layer', default=1, help='layers for fc, default as one')
 # ========================= Training Configs ==========================
-parser.add_argument('--weak_supervision_bias', type=float, default=1, help='weight fot the weak supervision branch')
+parser.add_argument('--weak_supervision_bias', type=float, default=0.1, help='weight fot the weak supervision branch')
 parser.add_argument('--att_bias', type=float, default=0.1, help='used to prevent overflow, default as 0.1')
 parser.add_argument('--quantity_bias', type=float, default=0.5, help='force each concept to be binary')
 parser.add_argument('--distinctiveness_bias', type=float, default=1, help='refer to paper')

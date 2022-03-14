@@ -15,16 +15,16 @@ def main():
     # CUDNN
     torch.backends.cudnn.benchmark = True
 
-    if not args.pre_train and args.dataset != "MNIST":
+    if not args.pre_train:
         checkpoint = torch.load(os.path.join(args.output_dir,
             f"{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt_no_slot.pt"), map_location=device)
         model.load_state_dict(checkpoint, strict=False)
         # fix_parameter(model, ["back_bone"], mode="fix")
         # print(colored('trainable parameter name: ', "blue"))
         # print_param(model)
-        # print("load pre-trained model finished, start training")
+        print("load pre-trained model finished, start training")
     else:
-        print("start training")
+        print("start training the backbone")
 
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.AdamW(params, lr=args.lr)
@@ -41,18 +41,21 @@ def main():
             print("Adjusted learning rate to 1/10")
             optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.1
         train(args, model, device, train_loader1, optimizer, i)
-        if i == args.epoch - 1:
+
+        if i % args.fre == 0:
             map, acc = test_MAP(args, model, train_loader2, val_loader, device)
-            print("acc: ", acc)
-            print("map", map)
+            print("ACC: ", acc)
+            print("MAP", map)
 
         if args.pre_train:
-            test(args, model, val_loader, device)
+            if i % args.fre == 0:
+                print("start evaluation")
+                test(args, model, val_loader, device)
 
         if i == args.epoch - 1:
             torch.save(model.state_dict(), os.path.join(args.output_dir,
                 f"{args.dataset}_{args.base_model}_cls{args.num_classes}_" + f"cpt{args.num_cpt if not args.pre_train else ''}_" +
-                f"{'use_slot_' + args.act_type + '_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"))
+                f"{'use_slot_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"))
 
 
 if __name__ == '__main__':
