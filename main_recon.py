@@ -45,9 +45,8 @@ def main():
         accs.append(acc)
         if i % args.fre == 0:
             vis_one(model, device, valloader, epoch=i, select_index=1)
-        print(record_res)
-        print(record_att)
-        print(accs)
+        print("Reconstruction Loss: ", record_res)
+        print("Acc: ", accs)
         torch.save(model.state_dict(), f"saved_model/mnist_model_cpt{args.num_cpt}.pt")
 
 

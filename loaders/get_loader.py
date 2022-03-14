@@ -133,7 +133,7 @@ def load_all_imgs(args):
         val_imgs = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).data
         val_labels = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).targets
         return train_imgs, train_labels, val_imgs, val_labels, cat
-    elif args.dataset == "ImageNet":
+    elif args.dataset == "ImageNet" or args.dataset == "Custom":
         train = ImageNet(args, "train", transform=None).train
         val = ImageNet(args, "train", transform=None).val
         cat = ImageNet(args, "train", transform=None).category

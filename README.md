@@ -1,7 +1,7 @@
 ## Usage
 
 ##### Data Set
-Download CUB and set them into direction of your "dataset_dir".
+Download CUB or ImageNet and set them into direction of your "dataset_dir". You can also make your own dataset with the structure similar to ImageNet and name it as Custom.
 
 ##### Training for MNIST
 Using the following command
