@@ -1,3 +1,5 @@
+#BotCL: Learning Bottleneck Concepts in Image Classification
+
 ## Model Structure
 ![Structure Figure](figs/overview.png)
 
