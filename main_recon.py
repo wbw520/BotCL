@@ -52,8 +52,6 @@ def main():
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    args.epoch = 60
-    args.lr_drop = 40
     args.att_bias = 5
     args.quantity_bias = 0
     args.distinctiveness_bias = 0
