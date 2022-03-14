@@ -39,8 +39,8 @@ class ConceptAutoencoder(nn.Module):
 
         x = attn_cls.reshape(b, -1)
         cpt = self.activation(attn_cls)
-        if deactivate is not None:
-            x[0][deactivate] = 0
+        if deactivate != -1:
+            x[0][deactivate-1] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))

@@ -43,4 +43,5 @@ parser.add_argument('--use_weight', default=False, help='whether use fc weight f
 parser.add_argument('--top_samples', default=50, type=int, help='top n activated samples')
 # parser.add_argument('--demo_cls', default="n01498041", type=str)
 parser.add_argument('--fre', default=3, type=int, help='frequent of show results during training')
+parser.add_argument('--deactivate', default=-1, type=int, help='the index of concept to be deativated')
 

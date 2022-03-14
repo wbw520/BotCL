@@ -8,9 +8,9 @@ Using the following command for training
 ```
 python main_recon.py --num_classes 10 --num_cpt 20 --lr 0.001 --epoch 50 --lr_drop 30
 ```
-Use the following command for inference a sample. You can change index to select different input samples. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
+Use the following command for the inference of a sample. You can change the index to select different input samples. Change deactivate (deactivate one concept, 1 to num_class) and see the changes of reconstruction. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
 ```
-python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --top_sample 20
+python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
 ```
 
 #### Usage for CUB200, ImageNet and Custom
