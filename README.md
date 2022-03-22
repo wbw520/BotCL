@@ -43,8 +43,11 @@ python vis_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 
 
 #### Demo weight
 We provide some trained weight for demo. Download and set them to folder "saved_model/"
+
 ![MNIST](https://drive.google.com/file/d/1wQtsi2jTEoG1k877XNG9cB4njWztlkzn/view?usp=sharing)
+
 ![CUB 50 classes](https://drive.google.com/file/d/1XIcTPCCb3uXFOOb_PrNXjJHfMrh--wsy/view?usp=sharing)
+
 ![ImageNet 50 classes](https://drive.google.com/file/d/1VSAlC6QftQDUzIAE8WJ6D0tNEaa1niLR/view?usp=sharing)
 
 Run them as following:
