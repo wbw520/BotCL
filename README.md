@@ -53,7 +53,7 @@ We provide some trained weight for demo. Download and set them to folder "saved_
 Run them as following:
 ```
 MNIST
-python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
+python vis_recon.py --num_classes 10 --num_cpt 10 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
 
 CUB
 python process.py
