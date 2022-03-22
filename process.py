@@ -7,6 +7,9 @@ from model.retrieval.model_main import MainModel
 import h5py
 
 
+os.makedirs('data_map/', exist_ok=True)
+
+
 def main():
     model = MainModel(args)
     device = torch.device(args.device)
