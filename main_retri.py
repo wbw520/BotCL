@@ -19,7 +19,7 @@ def main():
         checkpoint = torch.load(os.path.join(args.output_dir,
             f"{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt_no_slot.pt"), map_location=device)
         model.load_state_dict(checkpoint, strict=False)
-        fix_parameter(model, ["layer1", "layer2", "layer3", "back_bone.conv1", "back_bone.bn1"], mode="fix")
+        fix_parameter(model, ["layer1", "layer2", "back_bone.conv1", "back_bone.bn1"], mode="fix")
         print(colored('trainable parameter name: ', "blue"))
         print_param(model)
         print("load pre-trained model finished, start training")

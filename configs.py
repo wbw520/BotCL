@@ -28,8 +28,8 @@ parser.add_argument('--consistence_bias', type=float, default=1, help='refer to 
 parser.add_argument('--start_epoch', default=0, type=int, metavar='N', help='start epoch')
 parser.add_argument('--lr', default=0.0001, type=float)
 parser.add_argument('--batch_size', default=128, type=int)
-parser.add_argument('--epoch', default=80, type=int)
-parser.add_argument('--lr_drop', default=60, type=float, nargs="+",
+parser.add_argument('--epoch', default=100, type=int)
+parser.add_argument('--lr_drop', default=80, type=float, nargs="+",
                     metavar='LRSteps', help='epochs to decay learning rate by 10')
 # ========================= Machine Configs ==========================
 parser.add_argument('--num_workers', default=4, type=int)

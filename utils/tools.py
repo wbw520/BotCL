@@ -69,10 +69,22 @@ def predict_hash_code(args, model, data_loader, device):
         data, label = data.to(device), label.to(device)
         if not args.pre_train:
             cpt, pred, att, update = model(data)
+            # if args.process:
+            #     att = att[0]
+            #     record_cpt = []
+            #     for i in range(args.num_cpt):
+            #         current_mean = att[i].mean()
+            #         incidence = att[i] > current_mean
+            #         new_att = att[i][incidence]
+            #         record_cpt.append(new_att.sum().unsqueeze(0)/len(incidence))
+            #     cpt = torch.cat(record_cpt, dim=0)
+            #     cpt = cpt.unsqueeze(0).squeeze(-1)
+
             acc = cal_acc(pred, label, False)
             accs += acc
         else:
             cpt = model(data)
+
         if is_start:
             all_output = cpt.cpu().detach().float()
             all_label = label.unsqueeze(-1).cpu().detach().float()
