@@ -13,14 +13,14 @@ def cal_acc(preds, labels):
 
 def train(args, model, device, loader, rec_loss, optimizer, epoch):
     recon_losses = AverageMeter('Reconstruction Loss', ':.4')
-    att_losses = AverageMeter('Att Loss', ':.4')
+    # att_losses = AverageMeter('Att Loss', ':.4')
     pred_losses = AverageMeter('Pred Loss', ':.4')
     batch_dis_losses = AverageMeter('Dis_loss_batch', ':.4')
     consistence_losses = AverageMeter('Consistence_loss', ':.4')
     q_losses = AverageMeter('Q_loss', ':.4')
     pred_acces = AverageMeter('Acc', ':.4')
     progress = ProgressMeter(len(loader),
-                             [recon_losses, att_losses, pred_losses, pred_acces, batch_dis_losses, consistence_losses, q_losses],
+                             [recon_losses, pred_losses, pred_acces, batch_dis_losses, consistence_losses, q_losses],
                              prefix="Epoch: [{}]".format(epoch))
 
     model.train()
@@ -37,7 +37,7 @@ def train(args, model, device, loader, rec_loss, optimizer, epoch):
         att_loss = att_area_loss(att)  # attention loss used to prevent overflow
 
         recon_losses.update(reconstruction_loss.item())
-        att_losses.update(att_loss.item())
+        # att_losses.update(att_loss.item())
         pred_losses.update(loss_pred.item())
         pred_acces.update(acc)
         q_losses.update(quantity_loss.item())

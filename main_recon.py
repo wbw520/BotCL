@@ -54,7 +54,7 @@ def main():
 if __name__ == '__main__':
     args = parser.parse_args()
     args.att_bias = 5
-    args.quantity_bias = 0
+    args.quantity_bias = 0.1
     args.distinctiveness_bias = 0
     args.consistence_bias = 0
     os.makedirs(args.output_dir + '/', exist_ok=True)

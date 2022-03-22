@@ -38,13 +38,14 @@ class ConceptAutoencoder(nn.Module):
         attn_cls = self.scale * torch.sum(cpt_activation, dim=-1)
 
         x = attn_cls.reshape(b, -1)
-        cpt = self.activation(attn_cls)
+        cpt = self.activation(x)
+        x = cpt
         if self.args.deactivate != -1:
             x[0][self.args.deactivate-1] = 0
         pred = self.aggregate(x)
         x = self.relu(self.fc1(x))
         x = self.tan(self.fc2(x))
-        return cpt, pred, x, attn, updates
+        return (cpt - 0.5) * 2, pred, x, attn, updates
 
 
 class Aggregate(nn.Module):
