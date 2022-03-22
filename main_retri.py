@@ -8,6 +8,9 @@ from loaders.get_loader import loader_generation
 from utils.tools import fix_parameter, print_param
 
 
+os.makedirs('saved_model/', exist_ok=True)
+
+
 def main():
     model = MainModel(args)
     device = torch.device(args.device)

@@ -9,6 +9,9 @@ from model.reconstruct.model_main import ConceptAutoencoder
 import os
 
 
+os.makedirs('saved_model/', exist_ok=True)
+
+
 def main():
     transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
     trainset = datasets.MNIST('../data', train=True, download=True, transform=transform)
