@@ -21,7 +21,7 @@ parser.add_argument('--layer', default=1, help='layers for fc, default as one')
 # ========================= Training Configs ==========================
 parser.add_argument('--weak_supervision_bias', type=float, default=1, help='weight fot the weak supervision branch')
 parser.add_argument('--att_bias', type=float, default=0.1, help='used to prevent overflow, default as 0.1')
-parser.add_argument('--quantity_bias', type=float, default=0.5, help='force each concept to be binary')
+parser.add_argument('--quantity_bias', type=float, default=0.1, help='force each concept to be binary')
 parser.add_argument('--distinctiveness_bias', type=float, default=1, help='refer to paper')
 parser.add_argument('--consistence_bias', type=float, default=1, help='refer to paper')
 # ========================= Learning Configs ==========================

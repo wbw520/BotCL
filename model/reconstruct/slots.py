@@ -29,7 +29,6 @@ class ScouterAttention(nn.Module):
             *to_k_layer_list
         )
 
-        self.gru = nn.GRU(dim, dim)
         self.vis = vis
         self.power = power
 
@@ -38,7 +37,6 @@ class ScouterAttention(nn.Module):
         slots = self.initial_slots.expand(b, -1, -1)
         k, v = self.to_k(inputs), inputs
         for _ in range(self.iters):
-            slots_prev = slots
             q = slots
 
             dots = torch.einsum('bid,bjd->bij', q, k) * self.scale
@@ -51,12 +49,6 @@ class ScouterAttention(nn.Module):
 
             updates = torch.einsum('bjd,bij->bid', inputs_x, attn)
             updates = updates / inputs_x.size(2)
-            self.gru.flatten_parameters()
-            slots, _ = self.gru(
-                updates.reshape(1, -1, d).contiguous(),
-                slots_prev.reshape(1, -1, d).contiguous()
-            )
-            slots = slots.reshape(b, -1, d)
 
         if self.vis or index is not None:
             if index != "pass":
