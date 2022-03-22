@@ -45,7 +45,7 @@ def batch_cpt_discriminate(data, att):
         current_att = att.sum(-1)[:, i]
         indices = current_att > current_att.mean()
         b, d = current_f[indices].shape
-        current_f = current_f[indices] / current_att[indices].unsqueeze(-1).expand(b, d)  # normalize feature
+        current_f = current_f[indices]
         record.append(torch.mean(current_f, dim=0, keepdim=True))
     record = torch.cat(record, dim=0)
     sim = F.cosine_similarity(record[None, :, :], record[:, None, :], dim=-1)
@@ -77,7 +77,7 @@ def att_consistence(update, att):
         current_att = att[:, i, :].sum(-1)
         indices = current_att > current_att.mean()
         b, d = current_up[indices].shape
-        need = current_up[indices] / current_att[indices].unsqueeze(-1).expand(b, d)  # normalize feature
+        need = current_up[indices]
         consistence_loss += F.cosine_similarity(need[None, :, :], need[:, None, :], dim=-1).mean()
     return consistence_loss/cpt
 

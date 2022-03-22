@@ -46,8 +46,8 @@ class ScouterAttention(nn.Module):
                    dots.sum(2).sum(1).expand_as(dots.permute([1, 2, 0])).permute([2, 0, 1])
             attn = torch.sigmoid(dots)
 
-            # attn = attn / attn.sum(dim=-1, keepdim=True)
-            updates = torch.einsum('bjd,bij->bid', inputs, attn)
+            attn2 = attn / (attn.sum(dim=-1, keepdim=True) + self.eps)
+            updates = torch.einsum('bjd,bij->bid', inputs, attn2)
             # updates = updates / (attn.sum(-1).unsqueeze(-1) + 1)
 
         if self.vis:
