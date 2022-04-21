@@ -31,7 +31,7 @@ def main():
     device = torch.device("cuda:0")
     model.to(device)
     checkpoint = torch.load(f"saved_model/mnist_model_cpt{args.num_cpt}.pt", map_location="cuda:0")
-    model.load_state_dict(checkpoint, strict=True)
+    model.load_state_dict(checkpoint, strict=False)
     model.eval()
 
     data, label = iter(valloader).next()
@@ -49,6 +49,7 @@ def main():
     index = args.index
 
     img_orl = Image.fromarray((data[index][0].cpu().detach().numpy()*255).astype(np.uint8), mode='L')
+    img_orl.save("vis/" + f'origin.png')
     img = data[index].unsqueeze(0).to(device)
     cpt, pred, cons, att_loss, pp = model(transform2(img))
     # print(torch.softmax(pred, dim=-1))

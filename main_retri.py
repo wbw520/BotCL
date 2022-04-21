@@ -46,12 +46,11 @@ def main():
         train(args, model, device, train_loader1, optimizer, i)
 
         if i % args.fre == 0:
-            map, acc = test_MAP(args, model, train_loader2, val_loader, device)
-            print("ACC: ", acc)
-            print("MAP", map)
-
-        if args.pre_train:
-            if i % args.fre == 0:
+            if not args.pre_train:
+                map, acc = test_MAP(args, model, train_loader2, val_loader, device)
+                print("ACC: ", acc)
+                print("MAP", map)
+            else:
                 print("start evaluation")
                 test(args, model, val_loader, device)
 

@@ -2,7 +2,7 @@
 
 import argparse
 parser = argparse.ArgumentParser(description="PyTorch implementation of cpt")
-parser.add_argument('--dataset', type=str, default="CUB200")
+parser.add_argument('--dataset', type=str, default="ImageNet")
 parser.add_argument('--dataset_dir', type=str, default="/media/wbw/a7f02863-b441-49d0-b546-6ef6fefbbc7e")
 parser.add_argument('--output_dir', type=str, default="saved_model")
 # ========================= Model Configs ==========================
@@ -35,7 +35,7 @@ parser.add_argument('--lr_drop', default=80, type=float, nargs="+",
 parser.add_argument('--num_workers', default=4, type=int)
 parser.add_argument('--device', default='cuda:0', help='device to use for training / testing')
 # ========================= Demo Configs ==========================
-parser.add_argument('--index', default=300, type=int)
+parser.add_argument('--index', default=0, type=int)
 parser.add_argument('--use_weight', default=False, help='whether use fc weight for the generation of attention mask')
 parser.add_argument('--top_samples', default=20, type=int, help='top n activated samples')
 # parser.add_argument('--demo_cls', default="n01498041", type=str)
