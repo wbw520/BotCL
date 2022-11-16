@@ -42,13 +42,15 @@ class ScouterAttention(nn.Module):
             q = slots
 
             dots = torch.einsum('bid,bjd->bij', q, k) * self.scale
-            dots = torch.div(dots, dots.sum(2).expand_as(dots.permute([2, 0, 1])).permute([1, 2, 0])) * \
-                   dots.sum(2).sum(1).expand_as(dots.permute([1, 2, 0])).permute([2, 0, 1])
+            dots = torch.div(dots, torch.abs(dots).sum(2).expand_as(dots.permute([2, 0, 1])).permute([1, 2, 0])) * \
+                   torch.abs(dots).sum(2).sum(1).expand_as(dots.permute([1, 2, 0])).permute([2, 0, 1])
             attn = torch.sigmoid(dots)
+
+            # print(torch.max(attn))
+            # dsfds()
 
             attn2 = attn / (attn.sum(dim=-1, keepdim=True) + self.eps)
             updates = torch.einsum('bjd,bij->bid', inputs, attn2)
-            # updates = updates / (attn.sum(-1).unsqueeze(-1) + 1)
 
         if self.vis:
             slots_vis_raw = attn.clone()
@@ -77,6 +79,7 @@ def vis(slots_vis_raw, loc, size, weight=None, things=None):
 
             slots_vis = (slots_vis.cpu().detach().numpy()).astype(np.uint8)
             for id, image in enumerate(slots_vis):
+
                 image = Image.fromarray(image, mode='L').resize([224, 224], resample=Image.BILINEAR)
                 if things is not None:
                     order, category, cpt_num = things

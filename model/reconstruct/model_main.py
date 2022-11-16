@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 from model.reconstruct.slots import ScouterAttention
 from model.reconstruct.position_encode import build_position_encoding
+import torch.nn.functional as F
 
 
 class ConceptAutoencoder(nn.Module):
@@ -64,53 +65,22 @@ class Aggregate(nn.Module):
         return x
 
 
-# class ConceptAutoencoder(nn.Module):
-#     def __init__(self, num_concepts):
-#         super(ConceptAutoencoder, self).__init__()
-#         self.conv1 = nn.Conv2d(in_channels=1, out_channels=10, kernel_size=(5, 5))
-#         self.conv2 = nn.Conv2d(in_channels=10, out_channels=20, kernel_size=(5, 5))
-#         self.fc1 = nn.Linear(20 * 20 * 20, 16)
-#         self.fc2 = nn.Linear(16, num_concepts)
-#         self.relu = nn.ReLU(inplace=True)
-#
-#         self.decoder = nn.Sequential(
-#             nn.Linear(num_concepts, 16), nn.ReLU(True),
-#             nn.Linear(16, 64), nn.ReLU(True),
-#             nn.Linear(64, 128), nn.ReLU(True),
-#             nn.Linear(128, 28 * 28),
-#             nn.Tanh()
-#         )
-#
-#     def forward(self, x):
-#         cpt = self.relu(self.conv1(x))
-#         cpt = self.relu(self.conv2(cpt))
-#         b = cpt.size()[0]
-#         cpt = cpt.view(b, -1)
-#         cpt = self.relu(self.fc1(cpt))
-#         encoder = self.fc2(cpt)
-#         decoder = self.decoder(encoder)
-#         return decoder
+class MNISTSimple(nn.Module):
+    def __init__(self):
+        super(MNISTSimple, self).__init__()
+        hidden_dim = 32
+        self.conv1 = nn.Conv2d(1, 10, (5, 5), stride=2, padding=1)  # b, 16, 10, 10
+        self.conv2 = nn.Conv2d(10, hidden_dim, (5, 5), stride=2, padding=1)  # b, 8, 3, 3
+        self.relu = nn.ReLU(inplace=True)
+        self.fc = nn.Linear(hidden_dim, 10)
 
-
-# class ConceptAutoencoder(nn.Module):
-#     def __init__(self, num_concepts):
-#         super(ConceptAutoencoder, self).__init__()
-#         self.conv1 = nn.Conv2d(1, 16, (3, 3), stride=2, padding=1)  # b, 16, 10, 10
-#         self.conv2 = nn.Conv2d(16, 32, (3, 3), stride=2, padding=1)  # b, 8, 3, 3
-#
-#         self.dconv1 = nn.ConvTranspose2d(32, 16, (2, 2), stride=2)  # b, 16, 5, 5
-#         self.dconv2 = nn.ConvTranspose2d(16, 1, (2, 2), stride=2)  # b, 16, 5, 5
-#
-#         self.relu = nn.ReLU(inplace=True)
-#         self.tan = nn.Tanh()
-#
-#     def forward(self, x):
-#         cpt = self.relu(self.conv1(x))
-#         cpt = self.relu(self.conv2(cpt))
-#         cpt = self.relu(self.dconv1(cpt))
-#         cpt = self.tan(self.dconv2(cpt))
-#         return cpt
-
+    def forward(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        f = x
+        x = F.adaptive_max_pool2d(x, 1).squeeze(-1).squeeze(-1)
+        pred = self.fc(x)
+        return pred, f
 
 # if __name__ == '__main__':
 #     model = ConceptAutoencoder(num_concepts=10)

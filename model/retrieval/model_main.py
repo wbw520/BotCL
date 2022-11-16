@@ -2,6 +2,8 @@ from timm.models import create_model
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+import numpy as np
+from PIL import Image
 from model.retrieval.slots import ScouterAttention, vis
 from model.retrieval.position_encode import build_position_encoding
 from timm.models.layers import SelectAdaptivePool2d
@@ -48,18 +50,20 @@ class MainModel(nn.Module):
 
         if not self.pre_train:
             self.conv1x1 = nn.Conv2d(self.num_features, hidden_dim, kernel_size=(1, 1), stride=(1, 1))
+            self.norm = nn.BatchNorm2d(hidden_dim)
             self.position_emb = build_position_encoding('sine', hidden_dim=hidden_dim)
             self.slots = ScouterAttention(args, hidden_dim, num_concepts, vis=self.vis)
-            self.norm = nn.BatchNorm2d(hidden_dim)
             self.scale = 1
             self.cls = torch.nn.Linear(num_concepts, num_classes)
         else:
-            self.fc = nn.Linear(self.num_features, args.num_classes)
+            self.fc = nn.Linear(self.num_features, num_classes)
             self.drop_rate = 0
 
     def forward(self, x, weight=None, things=None):
         x = self.back_bone(x)
+        features = x
         # x = x.view(x.size(0), self.num_features, self.feature_size, self.feature_size)
+
         if not self.pre_train:
             x = self.conv1x1(x)
             x = self.norm(x)
@@ -84,7 +88,27 @@ class MainModel(nn.Module):
             if self.drop_rate > 0:
                 x = F.dropout(x, p=self.drop_rate, training=self.training)
             x = self.fc(x)
-            return x
+            return x, features
+
+
+class MainModel2(nn.Module):
+    def __init__(self, args, vis=False):
+        super(MainModel2, self).__init__()
+        self.args = args
+        self.pre_train = args.pre_train
+        if "18" not in args.base_model:
+            self.num_features = 2048
+        else:
+            self.num_features = 512
+        self.feature_size = args.feature_size
+        self.drop_rate = 0.0
+        self.back_bone = load_backbone(args)
+
+    def forward(self, x):
+        x = self.back_bone(x)
+        features = x
+
+        return features
 
 
 # if __name__ == '__main__':

@@ -39,6 +39,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args.process = True
     args.pre_train = False
-    # args.batch_size = 1
+    args.batch_size = 64
     main()
 

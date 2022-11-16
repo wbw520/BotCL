@@ -34,6 +34,8 @@ def main():
     model.to(device)
 
     train_loader1, train_loader2, val_loader = loader_generation(args)
+    print("data prepared")
+    acc_max = 0
 
     for i in range(args.epoch):
         print(colored('Epoch %d/%d' % (i + 1, args.epoch), 'yellow'))
@@ -45,16 +47,17 @@ def main():
             optimizer.param_groups[0]["lr"] = optimizer.param_groups[0]["lr"] * 0.1
         train(args, model, device, train_loader1, optimizer, i)
 
-        if i % args.fre == 0:
-            if not args.pre_train:
-                map, acc = test_MAP(args, model, train_loader2, val_loader, device)
-                print("ACC: ", acc)
-                print("MAP", map)
-            else:
-                print("start evaluation")
-                test(args, model, val_loader, device)
+        if not args.pre_train:
+            map, acc = test_MAP(args, model, train_loader2, val_loader, device)
+            print("ACC: ", acc)
+            print("MAP", map)
+        else:
+            print("start evaluation")
+            acc = test(args, model, val_loader, device)
 
-        if i == args.epoch - 1:
+        if acc > acc_max:
+            acc_max = acc
+            print("get better result, save current model.")
             torch.save(model.state_dict(), os.path.join(args.output_dir,
                 f"{args.dataset}_{args.base_model}_cls{args.num_classes}_" + f"cpt{args.num_cpt if not args.pre_train else ''}_" +
                 f"{'use_slot_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"))

@@ -23,16 +23,66 @@ def pairwise_loss(outputs1, outputs2, label1, label2, sigmoid_param=1.):
     return loss
 
 
+def pairwise_similarity_label(label):
+    pair_label = F.cosine_similarity(label[:, None, :], label[None, :, :], dim=2)
+    return pair_label
+
+
+def soft_similarity(features, label):
+    s_loss = torch.abs(torch.sigmoid(features) - label)
+    return torch.mean(s_loss)
+
+
+def hard_similarity(dot_product, similarity):
+    exp_product = torch.exp(dot_product)
+    exp_loss = (torch.log(1 + exp_product) - similarity * dot_product)
+    mask_positive = similarity > 0
+    mask_negative = similarity <= 0
+    S1 = torch.sum(mask_positive.float())
+    S0 = torch.sum(mask_negative.float())
+    S = S0 + S1
+
+    exp_loss[similarity > 0] = exp_loss[similarity > 0] * (S / S1)
+    exp_loss[similarity <= 0] = exp_loss[similarity <= 0] * (S / S0)
+    loss = torch.mean(exp_loss)
+
+    return loss
+
+
+def pairwise_loss2(feature1, feature2, label, sigmoid_param=1.):
+    label_similarity = pairwise_similarity_label(label)
+    features_dis = sigmoid_param * torch.mm(feature1, feature2.t())
+
+    label_similarity = label_similarity.reshape(-1)
+    features_dis = features_dis.reshape(-1)
+    hard_index_1 = label_similarity == 0
+    hard_index_2 = label_similarity == 1
+    hard_index = hard_index_1 | hard_index_2
+    soft_index = ~ hard_index
+    similarity_hard = label_similarity[hard_index]
+    similarity_soft = label_similarity[soft_index]
+
+    features_dis_hard = features_dis[hard_index]
+    features_dis_soft = features_dis[soft_index]
+
+    hard_loss = hard_similarity(features_dis_hard, similarity_hard)
+    soft_loss = soft_similarity(features_dis_soft, similarity_soft)
+
+    return (hard_loss + soft_loss) / 2
+
+
 def quantization_loss(cpt):
     q_loss = torch.mean((torch.abs(cpt)-1.0)**2)
     return q_loss
 
 
-def get_retrieval_loss(y, label, num_cls, device):
+def get_retrieval_loss(args, y, label, num_cls, device):
     b = label.shape[0]
-    label = label.unsqueeze(-1)
-    label = torch.zeros(b, num_cls).to(device).scatter(1, label, 1)
+    if args.dataset != "matplot":
+        label = label.unsqueeze(-1)
+        label = torch.zeros(b, num_cls).to(device).scatter(1, label, 1)
     similarity_loss = pairwise_loss(y, y, label, label, sigmoid_param=10. / 32)
+    # similarity_loss = pairwise_loss2(y, y, label.float(), sigmoid_param=10. / 32)
     q_loss = quantization_loss(y)
     return similarity_loss, q_loss
 

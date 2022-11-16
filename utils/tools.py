@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 from PIL import Image
-from tqdm import tqdm
 import torch.nn.functional as F
 import copy
 import matplotlib.cm as mpl_color_map
@@ -69,18 +68,11 @@ def predict_hash_code(args, model, data_loader, device):
         data, label = data.to(device), label.to(device)
         if not args.pre_train:
             cpt, pred, att, update = model(data)
-            # if args.process:
-            #     att = att[0]
-            #     record_cpt = []
-            #     for i in range(args.num_cpt):
-            #         current_mean = att[i].mean()
-            #         incidence = att[i] > current_mean
-            #         new_att = att[i][incidence]
-            #         record_cpt.append(new_att.sum().unsqueeze(0)/len(incidence))
-            #     cpt = torch.cat(record_cpt, dim=0)
-            #     cpt = cpt.unsqueeze(0).squeeze(-1)
-
-            acc = cal_acc(pred, label, False)
+            if args.dataset != "matplot":
+                acc = cal_acc(pred, label, False)
+            else:
+                pred = F.sigmoid(pred)
+                acc = torch.eq(pred.round(), label).sum().float().item() / pred.shape[0] / pred.shape[1]
             accs += acc
         else:
             cpt = model(data)
@@ -102,7 +94,7 @@ def test_MAP(args, model, database_loader, test_loader, device):
     print('Waiting for generate the hash code from test set')
     test_hash, test_labels, test_acc = predict_hash_code(args, model, test_loader, device)
     print('Calculate MAP.....')
-    MAP, R, APx = mean_average_precision(database_hash, test_hash, database_labels, test_labels)
+    MAP, R, APx = mean_average_precision(args, database_hash, test_hash, database_labels, test_labels)
 
     return MAP, test_acc
 

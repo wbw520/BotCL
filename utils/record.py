@@ -55,8 +55,8 @@ def show(img_orl, img_recons, name=None):
 
     ax1 = plt.subplot(121)
     ax2 = plt.subplot(122)
-    ax1.imshow(img_orl, cmap="gray")
-    ax2.imshow(img_recons, cmap="gray")
+    ax1.imshow(img_orl)
+    ax2.imshow(img_recons)
 
     plt.title("Epoch: " + str(name))
     plt.tight_layout()
