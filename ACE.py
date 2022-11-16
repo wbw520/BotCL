@@ -10,17 +10,17 @@ import sklearn.metrics.pairwise as metrics
 from configs import parser
 import os
 import shutil
-from draws.draw_synthetic import draw_syn
+# from draws.draw_synthetic import draw_syn
 import torch
 from quantitative_eval import make_statistic
+import json
 from model.retrieval.model_main import MainModel
 
 
 def load_image_from_file(filename, shape):
     img = np.array(Image.open(filename).resize(shape, Image.BILINEAR))
     # Normalize pixel values to between 0 and 1.
-    img = np.float32(img) / 255.0
-
+    img = np.float32(img) / 255
     return img
 
 
@@ -40,7 +40,6 @@ class ConceptDiscovery(object):
             record.append(img_root)
 
         train, test = train_test_split(record, train_size=0.9, random_state=1)
-        test = test[:50]
         print("get test image, number:", len(test))
         img_list = []
         for i in range(len(test)):
@@ -57,7 +56,7 @@ class ConceptDiscovery(object):
                 print("processed " + str(id) + " image for patches")
             image_superpixels, image_patches, image_masks = self.return_superpixels(img)
             for superpixel, patch, mask in zip(image_superpixels, image_patches, image_masks):
-                dataset.append(superpixel)
+                # dataset.append(superpixel)
                 patches.append(patch)
                 image_numbers.append(fn)
                 masks.append(mask)
@@ -139,9 +138,11 @@ class ConceptDiscovery(object):
         image_resized = np.array(image.resize(self.image_shape, Image.BICUBIC)).astype(float)
         return image_resized, patch * 255
 
-    def get_activation(self, imgs, bs=256):
+    @torch.no_grad()
+    def get_activation(self, imgs, bs=64):
         output = []
         for i in range(int(imgs.shape[0] / bs) + 1):
+            print(i)
             _, features = self.model(torch.from_numpy(np.array(imgs[i * bs:(i + 1) * bs])).permute([0, 3, 1, 2]).to(device).float())
             features = F.adaptive_max_pool2d(features, 1).squeeze(-1).squeeze(-1)
             output.append(features.cpu().detach().numpy())
@@ -195,7 +196,7 @@ class ConceptDiscovery(object):
         print("calculate ace discovery")
         current_img_name = "start"
         cpt_sample = None
-        detect_record = {}
+        detect_record = []
         statistic_sample = [0, 0, 0, 0, 0]
 
         for k in range(len(image_numbers)):
@@ -210,7 +211,6 @@ class ConceptDiscovery(object):
                 name_label = current_img_name.split("/")[-1].split(".")[0]
                 sample_root = "loaders/matplob/label/" + name_label
                 cpt_sample = get_name(sample_root, mode_folder=False)
-                detect_record = {}
 
                 if cpt_sample is not None:
                     for h in range(len(cpt_sample)):
@@ -227,26 +227,23 @@ class ConceptDiscovery(object):
                 current_sample = cv2.imread(sample_root + "/" + cpt_sample[s], 0)
                 current_sample[current_sample != 255] = 1
                 current_sample[current_sample == 255] = 0
-                sample_area_sum = current_sample.sum()
 
                 overlap = mask_current + current_sample
                 overlap_sum = (overlap == 2).sum()
+                union_sum = (overlap > 0).sum()
 
-                # if k == 624:
-                #     print(cpt_index)
-                #     print(sample_index)
-                #     print(image_name)
-                #     print(overlap_sum / sample_area_sum)
-                #     print("-------")
-                #     print(detect_record)
-
-                if overlap_sum / sample_area_sum > thresh_overlap:
-                    if cpt_index not in detect_record:
-                        detect_record.update({cpt_index: [sample_index]})
-                    elif sample_index not in detect_record[cpt_index]:
-                        detect_record[cpt_index].append(sample_index)
-                    else:
+                if overlap_sum / union_sum > thresh_overlap:
+                    # if cpt_index not in detect_record:
+                    #     detect_record.update({cpt_index: [sample_index]})
+                    # elif sample_index not in detect_record[cpt_index]:
+                    #     detect_record[cpt_index].append(sample_index)
+                    # else:
+                    #     continue
+                    current_d_name = image_name + "_" + str(cpt_index) + str(sample_index)
+                    if current_d_name in detect_record:
                         continue
+                    else:
+                        detect_record.append(current_d_name)
 
                     statistic[cpt_index][sample_index] += 1
 
@@ -256,17 +253,17 @@ class ConceptDiscovery(object):
         #
         # print(statistic_sample)
         #
-        # with open("cpt_save.json", "w") as write_file:
-        #     json.dump({"files_ace": statistic}, write_file)
-
-        draw_syn(statistic, statistic_sample)
+        with open("cpt_save_ace.json", "w") as write_file:
+            json.dump({"files_ace": statistic}, write_file)
+        # print(statistic_sample)
+        # draw_syn(statistic, statistic_sample)
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
     args.pre_train = True
-    cluster_number = 5
-    thresh_overlap = 0.9
+    cluster_number = 15
+    thresh_overlap = 0.1
     model_ = MainModel(args)
     args.device = "cuda:1"
     device = torch.device(args.device)
