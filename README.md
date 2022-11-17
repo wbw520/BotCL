@@ -10,6 +10,10 @@ Interpreting and explaining the behavior of neural networks is critical for many
 
 #### Data Set
 Download CUB or ImageNet and set them into direction of your "dataset_dir". You can also make your own dataset with the structure similar to ImageNet and name it as Custom.
+For the generation of Synthetic, use following command and a new folder names "matplob" will be generated.
+```
+python loaders/generate_matplob.py
+```
 
 #### Usage for MNIST
 Using the following command for training
@@ -21,14 +25,14 @@ Use the following command for the inference of a sample. You can change the inde
 python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
 ```
 
-#### Usage for CUB200, ImageNet and Custom
-We first pre-train the backbone and then train the whole model. For ImageNet and Custom, just change the name for dataset.
+#### Usage for CUB200, ImageNet, Synthetic and Custom
+We first pre-train the backbone and then train the whole model. For ImageNet, Synthetic and Custom, just change the name for dataset.
 ```
 Pre-training of backbone:
 python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --pre_train True --dataset CUB200 --dataset_dir "your dir"
 
 Training for BotCL:
-python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --dataset CUB200 --dataset_dir "your dir" --weak_supervision_bias 1 --quantity_bias 0.5 --distinctiveness_bias 1 --consistence_bias 1
+python main_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --dataset CUB200 --dataset_dir "your dir" --weak_supervision_bias 0.1 --quantity_bias 0.1 --distinctiveness_bias 0.01 --consistence_bias 0.05
 ```
 
 Use the following commend to visualize the learned concept.
@@ -38,28 +42,5 @@ First run process.py to extarct the activation for all dataset samples:
 python process.py
 
 Then see the generated concepts by:
-python vis_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 300 --top_sample 20 --dataset CUB200
-```
-
-#### Demo weight
-We provide some trained weight for demo. Download and set them to folder "saved_model/"
-
-[MNIST](https://drive.google.com/file/d/1wQtsi2jTEoG1k877XNG9cB4njWztlkzn/view?usp=sharing)
-
-[CUB 50 classes](https://drive.google.com/file/d/1XIcTPCCb3uXFOOb_PrNXjJHfMrh--wsy/view?usp=sharing)
-
-[ImageNet 50 classes](https://drive.google.com/file/d/1VSAlC6QftQDUzIAE8WJ6D0tNEaa1niLR/view?usp=sharing)
-
-Run them as following:
-```
-MNIST
-python vis_recon.py --num_classes 10 --num_cpt 10 --index 0 --top_sample 20 --top_sample 20 --deactivate -1
-
-CUB
-python process.py
-python vis_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 300 --top_sample 20 --dataset CUB200
-
-ImageNet
-python process.py
 python vis_retri.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 300 --top_sample 20 --dataset CUB200
 ```

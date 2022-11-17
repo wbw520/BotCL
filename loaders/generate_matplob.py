@@ -274,4 +274,4 @@ def create_dataset(n_sample=7500):
   np.save('concept_data.npy', concept)
 
 
-create_dataset(n_sample=7500)
+create_dataset(n_sample=20000)
