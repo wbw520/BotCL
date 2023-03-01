@@ -90,14 +90,15 @@ def test_MAP(args, model, database_loader, test_loader, device):
     test_hash, test_labels, test_acc = predict_hash_code(args, model, test_loader, device)
     print('Calculate MAP.....')
 
-    if args.num_classes > 400:
-        print("class number over" + str(args.num_classes) + "not do retrieval evaluation during training due to the time cost. Set MAP as 0.")
-        MAP = 0
-    else:
-        MAP, R, APx = mean_average_precision(args, database_hash, test_hash, database_labels, test_labels)
+    # if args.num_classes > 400:
+    #     print("class number over" + str(args.num_classes) + "not do retrieval evaluation during training due to the time cost. Set MAP as 0.")
+    #     MAP = 0
+    # else:
+    #     MAP, R, APx = mean_average_precision(args, database_hash, test_hash, database_labels, test_labels)
     # print(MAP)
     # print(R)
     # print(APx)
+    MAP = 0
     return MAP, test_acc
 
 

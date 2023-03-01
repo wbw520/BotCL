@@ -62,7 +62,7 @@ def get_transform(args):
         transform = transforms.Compose([transforms.Resize([args.img_size, args.img_size]), transforms.ToTensor(),
                                         transforms.Normalize([0.5071, 0.4867, 0.4408], [0.2675, 0.2565, 0.2761])])
         return {"train": transform, "val": transform}
-    elif args.dataset == "CUB200" or args.dataset == "ImageNet":
+    elif args.dataset == "CUB200" or args.dataset == "ImageNet" or args.dataset == "imagenet":
         transform_train = get_train_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
         transform_val = get_val_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
         return {"train": transform_train, "val": transform_val}
@@ -91,7 +91,7 @@ def select_dataset(args, transform):
         dataset_train = CUB_200(args, train=True, transform=transform["train"])
         dataset_val = CUB_200(args, train=False, transform=transform["val"])
         return dataset_train, dataset_val
-    elif args.dataset == "ImageNet":
+    elif args.dataset == "ImageNet" or args.dataset == "imagenet":
         dataset_train = ImageNet(args, "train", transform=transform["train"])
         dataset_val = ImageNet(args, "val", transform=transform["val"])
         return dataset_train, dataset_val
@@ -154,7 +154,7 @@ def load_all_imgs(args):
         val_imgs = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).data
         val_labels = datasets.CIFAR10('./data/cifar10', train=False, download=True, transform=None).targets
         return train_imgs, train_labels, val_imgs, val_labels, cat
-    elif args.dataset == "ImageNet" or args.dataset == "Custom":
+    elif args.dataset == "ImageNet" or args.dataset == "imagenet" or args.dataset == "Custom":
         train = ImageNet(args, "train", transform=None).train
         val = ImageNet(args, "train", transform=None).val
         cat = ImageNet(args, "train", transform=None).category

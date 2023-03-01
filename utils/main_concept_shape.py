@@ -19,7 +19,7 @@ if __name__ == '__main__':
     args.device = "cuda:1"
     device = torch.device(args.device)
     model_.to(device)
-    args.output_dir = "saved_model"
+    args.output_dir = "../saved_model"
     checkpoint = torch.load(os.path.join(args.output_dir,
                                                  f"{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt_no_slot.pt"),
                                     map_location=device)

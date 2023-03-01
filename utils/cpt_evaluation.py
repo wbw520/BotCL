@@ -34,7 +34,7 @@ def main():
     model.load_state_dict(checkpoint, strict=True)
     model.eval()
 
-    img = Image.open(os.path.join("loaders", "matplob", "raw", "5684.jpg")).convert('RGB')
+    img = Image.open(os.path.join("../loaders", "matplob", "raw", "5684.jpg")).convert('RGB')
     img = img.resize([224, 224], resample=Image.BILINEAR)
     img.save(f'vis/origin.png')
     cpt, pred, att, update = model(transform(img).unsqueeze(0).to(device), None, None)

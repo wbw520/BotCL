@@ -8,9 +8,8 @@ import sklearn.cluster as cluster
 import torch
 import json
 from sklearn.manifold import TSNE
-from quantitative_eval import make_statistic
+from utils.quantitative_eval import make_statistic
 from loaders.ImageNet import get_name
-import sklearn.metrics.pairwise as metrics
 from sklearn.decomposition import PCA
 from model.retrieval.model_main import MainModel
 import cv2
@@ -210,7 +209,7 @@ if __name__ == '__main__':
     args.device = "cuda:2"
     device = torch.device(args.device)
     model_.to(device)
-    args.output_dir = "saved_model"
+    args.output_dir = "../saved_model"
     checkpoint = torch.load(os.path.join(args.output_dir,
                                                  f"{args.dataset}_{args.base_model}_cls{args.num_classes}_cpt_no_slot.pt"),
                                     map_location=device)

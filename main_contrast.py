@@ -60,7 +60,7 @@ def main():
             print("get better result, save current model.")
             torch.save(model.state_dict(), os.path.join(args.output_dir,
                 f"{args.dataset}_{args.base_model}_cls{args.num_classes}_" + f"cpt{args.num_cpt if not args.pre_train else ''}_" +
-                f"{'use_slot_' + args.cpt_activation if not args.pre_train else 'no_slot'}.pt"))
+                f"{'use_slot_' + args.cpt_activation if not args.pre_train else 'no_slot'}3.pt"))
 
 
 if __name__ == '__main__':
