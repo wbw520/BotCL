@@ -10,23 +10,19 @@ Interpreting and explaining the behavior of neural networks is critical for many
 
 #### Data Set
 Download CUB or ImageNet and set them into direction of your "dataset_dir". You can also make your own dataset with the structure similar to ImageNet and name it as Custom.
-For the generation of Synthetic, use following command and a new folder names "matplob" will be generated.
-```
-python loaders/generate_matplob.py
-```
 
 #### Usage for MNIST
 Using the following command for training
 ```
 python main_recon.py --num_classes 10 --num_cpt 20 --lr 0.001 --epoch 50 --lr_drop 30
 ```
-Use the following command for the inference of a sample. You can change the index to select different input samples. Change top-sample (top-10 in the paper) to show more details for a concept. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
+Use the following command for the inference of a sample. You can change the index to select different input samples. Change top-sample (top-10 in the paper) to show more details for a concept. Change deactivate to block a concept. Visualization for the input sample and all concepts are shown at folder "vis" and "vis_pp", respectively. 
 ```
 python vis_recon.py --num_classes 10 --num_cpt 20 --index 0 --top_sample 20 ---deactivate -1
 ```
 
 #### Usage for CUB200, ImageNet, Synthetic (matplot) and Custom
-We first pre-train the backbone and then train the whole model. For ImageNet, Synthetic (matplot) and Custom, just change the name for dataset.
+We first pre-train the backbone and then train the whole model. For ImageNet, and Custom, just change the name for dataset.
 ```
 Pre-training of backbone:
 python main_contrast.py --num_classes 50 --num_cpt 20 --base_model resnet18 --lr 0.0005 --epoch 60 --lr_drop 40 --pre_train True --dataset CUB200 --dataset_dir "your dir"
@@ -42,5 +38,5 @@ First run process.py to extarct the activation for all dataset samples:
 python process.py
 
 Then see the generated concepts by:
-python vis_contrast.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 300 --top_sample 20 --dataset CUB200
+python vis_contrast.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 100 --top_sample 20 --dataset CUB200
 ```

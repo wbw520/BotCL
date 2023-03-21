@@ -3,7 +3,7 @@ import torch
 from configs import parser
 from utils.tools import predict_hash_code, mean_average_precision
 import os
-from model.retrieval.model_main import MainModel
+from model.contrast.model_main import MainModel
 import h5py
 
 

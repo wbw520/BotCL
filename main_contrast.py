@@ -2,8 +2,8 @@ import os
 import torch
 from termcolor import colored
 from configs import parser
-from utils.engine_retri import train, test_MAP, test
-from model.retrieval.model_main import MainModel
+from utils.engine_contrast import train, test_MAP, test
+from model.contrast.model_main import MainModel
 from loaders.get_loader import loader_generation
 from utils.tools import fix_parameter, print_param
 

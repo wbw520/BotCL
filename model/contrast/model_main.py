@@ -2,11 +2,8 @@ from timm.models import create_model
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-import numpy as np
-from PIL import Image
-from model.retrieval.slots import ScouterAttention, vis
-from model.retrieval.position_encode import build_position_encoding
-from timm.models.layers import SelectAdaptivePool2d
+from model.contrast.slots import ScouterAttention, vis
+from model.contrast.position_encode import build_position_encoding
 
 
 class Identical(nn.Module):

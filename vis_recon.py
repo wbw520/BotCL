@@ -35,16 +35,6 @@ def main():
     model.eval()
 
     data, label = iter(valloader).next()
-    #0, 17, 26, 34,
-    #9   9
-    #15   5
-    #2   1
-    #3   0
-    #4   4
-    #32   3
-    #21   6
-    #84   8
-    #1    2
 
     index = args.index
 
@@ -61,7 +51,6 @@ def main():
         slot_image = np.array(Image.open(f'vis/0_slot_{id}.png'), dtype=np.uint8)
         heatmap_only, heatmap_on_image = apply_colormap_on_image(img_orl, slot_image, 'jet')
         heatmap_on_image.save("vis/" + f'0_slot_mask_{id}.png')
-
 
     # att_record = attention_estimation_mnist(val_imgs, val_target, model, transform, transform2, device, name=7)
     # print(att_record.shape)
