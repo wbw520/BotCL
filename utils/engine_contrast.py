@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from model.retrieval.loss import get_retrieval_loss, batch_cpt_discriminate, att_consistence, att_discriminate, att_binary, \
+from model.contrast.loss import get_retrieval_loss, batch_cpt_discriminate, att_consistence, att_discriminate, att_binary, \
     att_area_loss
 from .record import AverageMeter, ProgressMeter, show
 from .tools import cal_acc, predict_hash_code, mean_average_precision
