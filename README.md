@@ -1,4 +1,5 @@
 # Learning Bottleneck Concepts in Image Classification
+[PDF](https://arxiv.org/pdf/2304.07193.pdf)
 
 ## Model Structure
 ![Structure Figure](figs/overview.png)
