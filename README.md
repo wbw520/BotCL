@@ -41,3 +41,16 @@ python process.py
 Then see the generated concepts by:
 python vis_contrast.py --num_classes 50 --num_cpt 20 --base_model resnet18 --index 100 --top_sample 20 --dataset CUB200
 ```
+
+## Publication
+
+If you want to use this work, please consider citing the following paper.
+```
+@inproceedings{wang2023botcl,
+ author = {Bowen Wang and Liangzhi Li and Yuta Nakashima and Hajime Nagahara},
+ booktitle = {IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+ pages = {},
+ title = {Learning Bottleneck Concepts in Image Classification},
+ year = {2023}
+}
+```
