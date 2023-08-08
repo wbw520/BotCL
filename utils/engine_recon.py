@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from utils.record import AverageMeter, ProgressMeter, show
-from model.retrieval.loss import batch_cpt_discriminate, att_consistence, quantization_loss, att_area_loss
+from model.contrast.loss import batch_cpt_discriminate, att_consistence, quantization_loss, att_area_loss
 
 
 def cal_acc(preds, labels):
