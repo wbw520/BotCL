@@ -34,7 +34,7 @@ def main():
     model.load_state_dict(checkpoint, strict=False)
     model.eval()
 
-    data, label = iter(valloader).next()
+    data, label = next(iter(valloader))
 
     index = args.index
 

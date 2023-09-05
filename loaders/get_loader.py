@@ -3,6 +3,7 @@ from torch.utils.data.dataloader import DataLoader
 from loaders.CUB200 import CUB_200
 from loaders.ImageNet import ImageNet
 from loaders.matplob import Matplot, MakeImage
+from loaders.Butterfly import Butterfly
 import numpy as np
 from PIL import Image
 import torch
@@ -62,7 +63,7 @@ def get_transform(args):
         transform = transforms.Compose([transforms.Resize([args.img_size, args.img_size]), transforms.ToTensor(),
                                         transforms.Normalize([0.5071, 0.4867, 0.4408], [0.2675, 0.2565, 0.2761])])
         return {"train": transform, "val": transform}
-    elif args.dataset == "CUB200" or args.dataset == "ImageNet" or args.dataset == "imagenet":
+    elif args.dataset == "CUB200" or args.dataset == "ImageNet" or args.dataset == "imagenet" or args.dataset == "butterfly":
         transform_train = get_train_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
         transform_val = get_val_transformations(args, [[0.485, 0.456, 0.406], [0.229, 0.224, 0.225]])
         return {"train": transform_train, "val": transform_val}
@@ -100,6 +101,10 @@ def select_dataset(args, transform):
         dataset_train = Matplot(data_, "train", transform=transform["train"])
         dataset_val = Matplot(data_, "val", transform=transform["val"])
         return dataset_train, dataset_val
+    elif args.dataset == "butterfly":
+        dataset_train = Butterfly(args, "train", transform=transform["train"])
+        dataset_val = Butterfly(args, "test", transform=transform["val"])
+        return dataset_train, dataset_val
 
     raise ValueError(f'unknown {args.dataset}')
 
@@ -112,7 +117,7 @@ def loader_generation(args):
     train_loader1 = DataLoader(train_set, batch_size=args.batch_size,
                               shuffle=True,
                               num_workers=args.num_workers,
-                              pin_memory=False, drop_last=True)
+                              pin_memory=False, drop_last=(args.dataset != "butterfly"))
     train_loader2 = DataLoader(train_set, batch_size=args.batch_size,
                               shuffle=False,
                               num_workers=args.num_workers,
@@ -121,6 +126,7 @@ def loader_generation(args):
                            shuffle=False,
                            num_workers=args.num_workers,
                            pin_memory=False, drop_last=False)
+    
     return train_loader1, train_loader2, val_loader
 
 
@@ -136,7 +142,7 @@ def load_all_imgs(args):
                 ll = int(data[i][1])
             if args.dataset == "CUB200":
                 ll -= 1
-                root = os.path.join(os.path.join(args.dataset_dir, args.dataset, "CUB_200_2011", "CUB_200_2011"), 'images', root)
+                root = os.path.join(os.path.join(args.dataset_dir), 'images', root)
             imgs.append(root)
             labels.append(ll)
         return imgs, labels
@@ -175,3 +181,10 @@ def load_all_imgs(args):
         train_imgs, train_labels = filter(train)
         val_imgs, val_labels = filter(val)
         return train_imgs, train_labels, val_imgs, val_labels
+    elif args.dataset == "butterfly":
+        dataset_train = Butterfly(args, "train", transform=None)
+        dataset_val = Butterfly(args, "test", transform=None)
+        train_imgs, train_labels = dataset_train.paths, dataset_train.lbls
+        val_imgs, val_labels = dataset_val.paths, dataset_val.lbls
+        cat = np.arange(0, args.num_classes)
+        return train_imgs, train_labels, val_imgs, val_labels, cat

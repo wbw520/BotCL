@@ -77,7 +77,7 @@ def evaluation(model, device, loader, rec_loss):
 
 
 def vis_one(model, device, loader, epoch=None, select_index=0):
-    data, label = iter(loader).next()
+    data, label = next(iter(loader))
     img_orl = data[select_index]
     img = img_orl.unsqueeze(0).to(device)
     pred = model(img)[2].view(28, 28).cpu().detach().numpy()

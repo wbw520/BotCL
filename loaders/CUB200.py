@@ -9,7 +9,7 @@ import numpy as np
 class CUB_200(Dataset):
     def __init__(self, args, train=True, transform=None):
         super(CUB_200, self).__init__()
-        self.root = os.path.join(args.dataset_dir, args.dataset, "CUB_200_2011", "CUB_200_2011")
+        self.root = os.path.join(args.dataset_dir)
         self.size = args.img_size
         self.num = args.num_classes
         self.train = train
