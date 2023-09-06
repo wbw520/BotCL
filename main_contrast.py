@@ -30,7 +30,7 @@ def main():
         print("start training the backbone")
 
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = torch.optim.AdamW(params, lr=args.lr)
+    optimizer = torch.optim.Adam(params, lr=args.lr)
     model.to(device)
 
     train_loader1, train_loader2, val_loader = loader_generation(args)
